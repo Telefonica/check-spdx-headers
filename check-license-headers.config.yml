@@ -1,0 +1,15 @@
+headers:
+  - files:
+      - "**/*.js"
+      - "**/*.ts"
+    license: "Apache-2.0"
+    ignore: "node_modules"
+  - files: "**/*.yml"
+    license:
+      - "MIT"
+      - "Apache-2.0"
+  - files: "**/node_modules/**"
+    ignore: true
+fail-on-error: false
+reporter: "markdown"
+log: "debug"
