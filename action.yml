@@ -7,12 +7,11 @@ author: 'Telefónica Innovación Digital'
 
 # Define your inputs here.
 inputs:
-  config-file:
-    description: 'Path to the configuration file'
-    default: 'check-license-headers.config.yml'
-  config:
-    description: 'Configuration object expressed as a YAML string'
-  log:
+  check:
+    description: 'List of files and licenses to check expressed as a YAML string'
+    multiline: true
+    required: false
+  logs:
     description: 'Log level'
     type: choice
     options:
@@ -23,7 +22,27 @@ inputs:
       - 'warn'
       - 'error'
       - 'silent'
-
+    default: 'info'
+    required: false
+  failOnError:
+    description: 'Fail the action when the check fails'
+    default: 'true'
+  reporter:
+    description: 'Reporter to use'
+    type: choice
+    options:
+      - 'json'
+      - 'markdown'
+      - 'text'
+    default: 'text'
+    required: false
+  config:
+    description: 'Configuration object expressed as a YAML string'
+    multiline: true
+    required: false
+  configFile:
+    description: 'Path to a configuration file'
+    default: 'check-license-headers.config.yml'
 runs:
   using: node20
   main: dist/index.js

@@ -3,11 +3,10 @@
 
 import * as core from "@actions/core";
 
-import { Options } from "./Options.types";
+import { getOptions } from "./Options";
+import { check } from "./lib/Check";
 
-function valueIfDefined<T = string>(value: T): T | undefined {
-  return value === "" ? undefined : value;
-}
+import { successReport } from "./Report";
 
 /**
  * The main function for the action.
@@ -15,12 +14,21 @@ function valueIfDefined<T = string>(value: T): T | undefined {
  */
 export async function run(): Promise<void> {
   try {
-    const log: Options["log"] = core.getInput("log") as Options["log"];
-
-    // eslint-disable-next-line no-console
-    console.log({
-      log: valueIfDefined(log),
+    const options = await getOptions();
+    const result = await check({
+      headers: options.headers,
+      log: options.log,
     });
+
+    if (!result.valid) {
+      core.setOutput("report", successReport(options.reporter));
+      if (options.failOnError) {
+        core.setFailed("Some files do not have a valid license");
+      }
+    } else {
+      core.info(successReport());
+      core.setOutput("report", successReport(options.reporter));
+    }
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message);
