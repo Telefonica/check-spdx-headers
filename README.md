@@ -1,6 +1,6 @@
 # Check license headers
 
-Checks that files in the repository are licensed accordingly, using SPDX headers
+Checks that all files have the correct license headers using the SPDX License Identifier
 
 # Table of Contents
 
