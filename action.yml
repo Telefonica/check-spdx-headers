@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: Apache-2.0
+
+name: 'Check SPDX Headers'
+description: 'GitHub Action to check that all files have the correct SPDX headers'
+author: 'Telefónica Innovación Digital'
+
+inputs:
+  rules:
+    description: 'List of rules expressed as a YAML string'
+    multiline: true
+    required: false
+  ignore:
+    description: 'Glob pattern or list of glob patterns to ignore in all rules expressed as a YAML string'
+    multiline: true
+    required: false
+  log:
+    description: 'Log level'
+    type: choice
+    options:
+      - 'silly'
+      - 'debug'
+      - 'verbose'
+      - 'info'
+      - 'warn'
+      - 'error'
+      - 'silent'
+    default: 'info'
+    required: false
+  fail-on-not-valid:
+    description: 'Fail the action (exit with code 1) if the check is not valid'
+    type: boolean
+    default: 'true'
+  reporter:
+    description: 'Reporter to use'
+    type: choice
+    options:
+      - 'json'
+      - 'markdown'
+      - 'text'
+    default: 'text'
+    required: false
+  config:
+    description: 'Configuration object expressed as a YAML string'
+    multiline: true
+    required: false
+  config-file:
+    description: 'Path to a configuration file'
+    default: 'check-spdx-headers.config.yml'
+outputs:
+  valid:
+    description: 'Whether the check passed or not'
+  report:
+    description: 'A report containing the results of the check'
+runs:
+  using: node20
+  main: dist/index.js

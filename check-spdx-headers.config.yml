@@ -1,0 +1,57 @@
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: MIT
+
+rules:
+  - name: "Source code"
+    headers:
+      - files:
+          - "**/*.js"
+          - "**/*.ts"
+          - "src/**"
+        license: "Apache-2.0"
+        ignore:
+          - "*.config.js"
+          - "src/lib/spdx-satisfies/**"
+          - "script/**"
+  - name: "Config files"
+    headers:
+      - files:
+          - ".github/**/*.yml"
+          - "**/*.yml"
+          - "*.config.js"
+        license:
+          - "MIT"
+          - "Apache-2.0"
+  - name: "Scripts"
+    headers:
+      - files:
+          - "script/**"
+        license:
+          - "MIT"
+          - "Apache-2.0"
+  - name: "Third party code"
+    headers:
+      - files:
+          - "src/lib/spdx-satisfies/**"
+        license: "MIT"
+  - name: "Copyright"
+    headers:
+      - files:
+          - ".github/**/*.yml"
+          - "**/*.ts"
+          - "**/*.js"
+          - "**/*.yml"
+        copyright:
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital and contributors"
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital"
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica"
+    ignore:
+      - "src/lib/spdx-satisfies/**"
+ignore:
+  - "**/node_modules/**"
+  - "dist/**"
+  - "coverage/**"
+  - ".github/ISSUE_TEMPLATE/**"
+failOnNotValid: true
+reporter: "text"
+log: "debug"
