@@ -1,14 +1,18 @@
 # SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 # SPDX-License-Identifier: Apache-2.0
 
-name: 'Check License Headers'
-description: 'GitHub Action to check that all files have the correct license headers using the SPDX License Identifier'
+name: 'Check SPDX Headers'
+description: 'GitHub Action to check that all files have the correct SPDX headers'
 author: 'Telefónica Innovación Digital'
 
 # Define your inputs here.
 inputs:
-  check:
-    description: 'List of files and licenses to check expressed as a YAML string'
+  rules:
+    description: 'List of rules expressed as a YAML string'
+    multiline: true
+    required: false
+  ignore:
+    description: 'Glob pattern or list of glob patterns to ignore in all rules expressed as a YAML string'
     multiline: true
     required: false
   logs:
@@ -42,7 +46,7 @@ inputs:
     required: false
   configFile:
     description: 'Path to a configuration file'
-    default: 'check-license-headers.config.yml'
+    default: 'check-spdx-headers.config.yml'
 runs:
   using: node20
   main: dist/index.js

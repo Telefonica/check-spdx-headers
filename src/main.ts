@@ -3,10 +3,13 @@
 
 import * as core from "@actions/core";
 
-import { getOptions } from "./Options";
-import { check } from "./lib/Check";
+import { getConfig } from "./Config";
+import { Checker } from "./lib/index";
 
-import { successReport } from "./Report";
+import { errorReport, successReport, ALL_VALID } from "./Report";
+
+const FAILED_MESSAGE = "Some files do not have a valid license";
+const OUTPUT_REPORT = "report";
 
 /**
  * The main function for the action.
@@ -14,20 +17,26 @@ import { successReport } from "./Report";
  */
 export async function run(): Promise<void> {
   try {
-    const options = await getOptions();
-    const result = await check({
-      headers: options.headers,
+    core.debug("Getting configuration...");
+    const options = await getConfig();
+
+    core.debug("Running checker...");
+    const checker = new Checker({
+      rules: options.rules,
       log: options.log,
+      ignore: options.ignore,
     });
+    const result = await checker.check();
 
     if (!result.valid) {
-      core.setOutput("report", successReport(options.reporter));
+      core.info(FAILED_MESSAGE);
+      core.setOutput(OUTPUT_REPORT, errorReport(options.reporter, result));
       if (options.failOnError) {
-        core.setFailed("Some files do not have a valid license");
+        core.setFailed(FAILED_MESSAGE);
       }
     } else {
-      core.info(successReport());
-      core.setOutput("report", successReport(options.reporter));
+      core.info(ALL_VALID);
+      core.setOutput(OUTPUT_REPORT, successReport(options.reporter, result));
     }
   } catch (error) {
     // Fail the workflow run if an error occurs

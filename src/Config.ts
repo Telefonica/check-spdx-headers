@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import * as core from "@actions/core";
 import { parse } from "yaml";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
-import { inputOptionsSchema } from "./Options.types";
-import type { InputOptions } from "./Options.types";
+import { inputOptionsSchema } from "./Config.types";
+import type { InputOptions } from "./Config.types";
 import { fromError } from "zod-validation-error";
 
 /**
@@ -40,20 +43,22 @@ function valueIfBoolean(value: string): boolean | undefined {
  * @returns The inputs from the action.
  */
 function getInputs() {
-  const headers = core.getMultilineInput("headers").join("\n");
+  const rules = core.getMultilineInput("rules").join("\n");
   const log = core.getInput("log");
   const failOnError = core.getInput("failOnError");
   const reporter = core.getInput("reporter");
   const config = core.getMultilineInput("config").join("\n");
   const configFile = core.getInput("configFile");
+  const ignore = core.getMultilineInput("ignore").join("\n");
 
   const inputs = {
-    headers: valueIfDefined(headers),
+    rules: valueIfDefined(rules),
     log: valueIfDefined(log),
     failOnError: valueIfBoolean(failOnError),
     reporter: valueIfDefined(reporter),
     config: valueIfDefined(config),
     configFile: valueIfDefined(configFile),
+    ignore: valueIfDefined(ignore),
   };
 
   (Object.keys(inputs) as (keyof typeof inputs)[]).forEach((key) => {
@@ -62,7 +67,7 @@ function getInputs() {
     }
   });
 
-  // TODO: Log the inputs from the action
+  core.debug(`Inputs: ${JSON.stringify(inputs)}`);
 
   return inputs;
 }
@@ -79,36 +84,51 @@ function parseYamlConfig(config: string) {
 async function loadConfigFile(configFile: string) {
   const fileExists = existsSync(configFile);
   if (fileExists) {
+    core.info(`Configuration file ${configFile} found. Loading...`);
     const config = await readFile(configFile, "utf8");
-    return parseYamlConfig(config);
+    const parsedConfig = parseYamlConfig(config);
+
+    core.debug(`Configuration from file: ${JSON.stringify(parsedConfig)}`);
+    return parsedConfig;
   }
-  // TODO: Add log about the file not existing
+  core.info(`Configuration file ${configFile} not found`);
   return {};
 }
 
 /**
- * Returns the options from the action inputs, loading configuration files if needed and parsing the inputs accordingly.
- * @returns The options from the action inputs and configuration files.
+ * Returns the configuration from the action inputs, loading configuration files if needed and parsing the inputs accordingly.
+ * @returns The configuration from the action inputs and configuration files.
  */
-export async function getOptions(): Promise<InputOptions> {
+export async function getConfig(): Promise<InputOptions> {
   const inputs = getInputs();
   let config: Partial<InputOptions> = {};
   let configFromFile: Partial<InputOptions> = {};
   let parsedInputs: Partial<InputOptions> = {};
 
   if (inputs.config) {
-    // TODO: Add log about the configuration being loaded
+    core.debug("Parsing the config option from the inputs");
     config = parseYamlConfig(inputs.config);
+    core.debug(`Parsed config option from inputs: ${JSON.stringify(config)}`);
   }
 
-  if (inputs.headers) {
-    // TODO: Add log about parsing the check object from the inputs
-    parsedInputs.headers = parseYamlConfig(inputs.headers);
+  if (inputs.rules) {
+    core.debug("Parsing the rules object from the inputs");
+    parsedInputs.rules = parseYamlConfig(inputs.rules);
+    core.debug(
+      `Parsed rules option from inputs: ${JSON.stringify(parsedInputs.rules)}`,
+    );
   }
 
-  // TODO: Add log about the configuration being loaded
+  if (inputs.ignore) {
+    core.debug("Parsing the ignore object from the inputs");
+    parsedInputs.ignore = parseYamlConfig(inputs.ignore);
+    core.debug(
+      `Parsed ignore option from inputs: ${JSON.stringify(parsedInputs.ignore)}`,
+    );
+  }
+
   configFromFile = await loadConfigFile(
-    inputs.configFile || "check-license-headers.config.yml",
+    inputs.configFile || "check-spdx-headers.config.yml",
   );
 
   const mergedConfig = {
@@ -118,8 +138,9 @@ export async function getOptions(): Promise<InputOptions> {
     ...parsedInputs,
   };
 
-  // eslint-disable-next-line no-console
-  console.log({ configFromFile, config, inputs, parsedInputs, mergedConfig });
+  core.debug(
+    `Configuration without default values: ${JSON.stringify(mergedConfig)}`,
+  );
 
   const mergedConfigWithDefaults = {
     ...mergedConfig,
@@ -128,9 +149,12 @@ export async function getOptions(): Promise<InputOptions> {
     reporter: mergedConfig.reporter || "text",
   };
 
+  core.debug(`Configuration: ${JSON.stringify(mergedConfigWithDefaults)}`);
+
   const result = inputOptionsSchema.safeParse(mergedConfigWithDefaults);
 
   if (!result.success) {
+    core.error("Error validating the configuration");
     throw new Error(fromError(result.error).toString());
   }
 

@@ -1,19 +1,60 @@
-import { Result } from "./lib/Check.types";
-import { Reporter } from "./Options.types";
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { Result } from "./lib/Checker.types";
+import { Reporter } from "./Config.types";
 import stripIndent from "strip-indent";
+import indentString from "indent-string";
 
-const TITLE = "Check license headers";
-const ALL_VALID = "All files have a valid license";
+const TITLE = "Check spdx headers";
+export const ALL_VALID = "All files have valid SPDX headers";
 
-export function successReport(reporter: Reporter = "text"): string {
+function getErrorsMarkdown(files: Result["files"]) {
+  const lines = [];
+
+  for (const file of files) {
+    if (!file.valid) {
+      lines.push(`- File: ${file.file}`);
+
+      for (const rule of file.result) {
+        if (!rule.valid) {
+          lines.push(
+            indentString(`- ${rule.rule}: ${rule.errors.join("\n")}`, 2),
+          );
+        }
+      }
+    }
+  }
+
+  return lines;
+}
+
+function validFilesMessage(validFiles: number): string {
+  if (validFiles > 0) {
+    return `✅ ${validFiles} ${pluralize(validFiles, "file")} have valid SPDX headers.`;
+  }
+  return "";
+}
+
+function pluralize(count: number, singular: string): string {
+  return count === 1 ? singular : `${singular}s`;
+}
+
+export function successReport(
+  reporter: Reporter = "text",
+  result: Result,
+): string {
   switch (reporter) {
     case "json":
-      return JSON.stringify({ valid: true, errors: [], message: ALL_VALID });
+      return JSON.stringify({
+        message: ALL_VALID,
+        ...result,
+      });
     case "markdown":
       return stripIndent(`
         *${TITLE}*
 
-        ✅ ${ALL_VALID}
+        ${validFilesMessage(result.validFiles)}
       `);
     default:
       return ALL_VALID;
@@ -24,7 +65,7 @@ export function errorReport(
   reporter: Reporter = "text",
   result: Result,
 ): string {
-  const summary = `${result.errors.length} file${result.errors.length > 0 ? "s" : ""} do not have a valid license`;
+  const summary = `${result.errors.length} ${pluralize(result.errors.length, "error")} checking SPDX headers`;
 
   switch (reporter) {
     case "json":
@@ -36,13 +77,15 @@ export function errorReport(
       return stripIndent(`
         *${TITLE}*
 
-        ❌ ${summary}:
+        Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.
+        
+        ${validFilesMessage(result.validFiles)}
+        ❌ ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")} have problems in SPDX headers.
 
-        ${result.errors
-          .map(
-            (error) =>
-              `  - \`${error.file.replace(process.cwd(), "")}\`: ${error.error}`,
-          )
+        Found ${result.errors.length} ${pluralize(result.invalidFiles, "error")}:
+
+        ${getErrorsMarkdown(result.files)
+          .map((line, index) => (index > 0 ? indentString(line, 8) : line))
           .join("\n")}
       `);
     default:

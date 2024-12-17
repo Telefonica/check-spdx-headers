@@ -1,6 +1,9 @@
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
 import { z } from "zod";
 
-import { optionsSchema } from "./lib/Check.types";
+import { configSchema, ignoreSchema } from "./lib/Config.types";
 
 export const reporterSchema = z.enum(["json", "markdown", "text"]).optional();
 /** Formatter of the response */
@@ -12,9 +15,10 @@ export type FailOnError = z.infer<typeof failOnErrorSchema>;
 
 export const inputOptionsSchema = z
   .object({
-    ...optionsSchema.shape,
+    ...configSchema.shape,
     reporter: reporterSchema,
     failOnError: failOnErrorSchema,
+    ignore: ignoreSchema,
   })
   .strict();
 

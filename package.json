@@ -1,15 +1,15 @@
 {
-  "name": "@tid-xcut/check-license-headers",
-  "description": "Checks that all files have the correct license headers using the SPDX License Identifier",
+  "name": "@tid-xcut/check-spdx-headers",
+  "description": "Checks that files have the correct SPDX headers",
   "version": "1.0.0",
   "author": "Telefónica Innovación Digital",
-  "homepage": "https://github.com/Telefonica/check-license-headers",
+  "homepage": "https://github.com/Telefonica/check-spdx-headers",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Telefonica/check-license-headers.git"
+    "url": "git+https://github.com/Telefonica/check-spdx-headers.git"
   },
   "bugs": {
-    "url": "https://github.com/Telefonica/check-license-headers/issues"
+    "url": "https://github.com/Telefonica/check-spdx-headers/issues"
   },
   "keywords": [
     "license",
@@ -44,10 +44,13 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@actions/core": "1.11.1",
+    "glob": "11.0.0",
+    "indent-string": "^5.0.0",
     "strip-indent": "^4.0.0",
+    "winston": "3.17.0",
     "yaml": "2.6.1",
     "zod": "3.24.1",
-    "zod-validation-error": "^3.4.0"
+    "zod-validation-error": "3.4.0"
   },
   "devDependencies": {
     "@eslint/js": "9.13.0",

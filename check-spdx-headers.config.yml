@@ -1,0 +1,28 @@
+rules:
+  - name: "License"
+    headers:
+      - files:
+          - "**/*.js"
+          - "**/*.ts"
+        license: "Apache-2.0"
+      - files:
+          - "**/*.yml"
+        license:
+          - "MIT"
+          - "Apache-2.0"
+    ignore:
+      - "**/node_modules/**"
+  - name: "Copyright"
+    headers:
+      - files:
+          - "**/*.ts"
+          - "**/*.js"
+          - "**/*.yml"
+        copyright: "Telefónica Innovación Digital and contributors"
+    ignore:
+      - "**/node_modules/**"
+ignore:
+  - "**/node_modules/**"
+failOnError: false
+reporter: "markdown"
+log: "silly"

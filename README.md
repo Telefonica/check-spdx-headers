@@ -1,6 +1,8 @@
-# Check license headers
+# Check SPDX headers
 
-Checks that all files have the correct license headers using the SPDX License Identifier
+Checks that files have the correct SPDX headers.
+
+Currently, __only supports checking for the license and copyright headers__.
 
 # Table of Contents
 
