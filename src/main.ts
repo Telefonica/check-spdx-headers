@@ -40,6 +40,7 @@ export async function run(): Promise<void> {
     }
   } catch (error) {
     // Fail the workflow run if an error occurs
+    core.error(error as Error);
     if (error instanceof Error) core.setFailed(error.message);
   }
 }

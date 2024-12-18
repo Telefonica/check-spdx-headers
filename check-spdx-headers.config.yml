@@ -1,28 +1,44 @@
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: MIT
+
 rules:
   - name: "License"
     headers:
       - files:
           - "**/*.js"
           - "**/*.ts"
+          - "src/**"
         license: "Apache-2.0"
+        ignore:
+          - "*.config.js"
+          - "src/lib/spdx-satisfies/**"
+          - "script/**"
+      - files:
+          - "src/lib/spdx-satisfies/**"
+        license: "MIT"
       - files:
           - "**/*.yml"
+          - "*.config.js"
+          - "script/**"
         license:
           - "MIT"
           - "Apache-2.0"
-    ignore:
-      - "**/node_modules/**"
   - name: "Copyright"
     headers:
       - files:
           - "**/*.ts"
           - "**/*.js"
           - "**/*.yml"
-        copyright: "Telefónica Innovación Digital and contributors"
+        copyright:
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital and contributors"
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital"
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica"
     ignore:
-      - "**/node_modules/**"
+      - "src/lib/spdx-satisfies/**"
 ignore:
   - "**/node_modules/**"
+  - "dist/**"
+  - "coverage/**"
 failOnError: false
 reporter: "markdown"
-log: "silly"
+log: "debug"

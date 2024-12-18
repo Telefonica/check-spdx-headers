@@ -12,7 +12,11 @@ import {
   FileError,
 } from "./Checker.types";
 import { createLogger } from "./Logger";
-import { readFile } from "fs/promises";
+import { readFile, stat } from "fs/promises";
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+import satisfies from "./spdx-satisfies/index";
 
 /**
  * Check files for license headers
@@ -54,19 +58,32 @@ export class Checker {
 
   private async _checkFileLicense(
     file: string,
-    license: RuleHeaders["license"],
+    license: string | string[],
   ): Promise<string | null> {
-    this._logger.silly(`Checking file license`, file, license);
-    const fileContent = await readFile(file, "utf-8");
+    this._logger.silly(`Checking file license`, { file, license });
+    const stats = await stat(file);
 
-    const spdxLicense = this._getSPDXHeader(fileContent, "License-Identifier");
+    if (stats.isFile()) {
+      const fileContent = await readFile(file, "utf-8");
 
-    if (!spdxLicense) {
-      return `Does not have a license header`;
-    }
+      const spdxLicense = this._getSPDXHeader(
+        fileContent,
+        "License-Identifier",
+      );
 
-    if (spdxLicense !== license) {
-      return `Does not have the correct license`;
+      if (!spdxLicense) {
+        const message = `Does not have a license header`;
+        this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
+        return message;
+      }
+
+      const approvedLicenses = Array.isArray(license) ? license : [license];
+
+      if (!satisfies(spdxLicense, approvedLicenses)) {
+        const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
+        this.logger.debug(`${message} in file "${file}"`);
+        return message;
+      }
     }
 
     return null;
@@ -74,20 +91,40 @@ export class Checker {
 
   private async _checkFileCopyright(
     file: string,
-    copyright: RuleHeaders["copyright"],
+    copyright: string | string[],
   ): Promise<string | null> {
-    this._logger.silly(`Checking file copyright`, file, copyright);
+    this._logger.silly(`Checking file copyright`, { file, copyright });
 
     const fileContent = await readFile(file, "utf-8");
 
     const spdxCopyright = this._getSPDXHeader(fileContent, "FileCopyrightText");
 
     if (!spdxCopyright) {
-      return `Does not have a copyright`;
+      const message = `Does not have a copyright`;
+      this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
+      return message;
     }
 
-    if (spdxCopyright !== copyright) {
-      return `Does not have the correct copyright`;
+    const approvedCopyrights = Array.isArray(copyright)
+      ? copyright
+      : [copyright];
+
+    if (!approvedCopyrights.length) {
+      return null;
+    }
+
+    const matches = approvedCopyrights.some((approvedCopyright) => {
+      const matcher = new RegExp(`^${approvedCopyright}$`);
+      if (!matcher.test(spdxCopyright)) {
+        return false;
+      }
+      return true;
+    });
+
+    if (!matches) {
+      const message = `Does not have the expected copyright`;
+      this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
+      return message;
     }
 
     return null;
@@ -98,7 +135,7 @@ export class Checker {
     headers: RuleHeaders,
     rule: string,
   ): Promise<FileRuleResult> {
-    this._logger.debug(`Checking file "${file}"`);
+    this._logger.debug(`Checking rule "${rule}" in file "${file}"`);
     const checkPromises = [];
     if (headers.license) {
       checkPromises.push(this._checkFileLicense(file, headers.license));
@@ -137,17 +174,17 @@ export class Checker {
       ? filesHeaders.files
       : [filesHeaders.files];
 
-    const headersName = `headers ${headersIndex + 1}`;
+    const mergedIgnore = [...(filesHeaders.ignore || []), ...(ignore || [])];
 
-    this._logger.verbose(`Checking ${headersName} of rule "${ruleName}"`);
+    const headersName = `headers ${headersIndex + 1}`;
 
     this._logger.debug(`Config for ${headersName} of rule "${ruleName}`, {
       ...filesHeaders,
       files: globPatterns,
-      ignore,
+      ignore: mergedIgnore,
     });
 
-    const files = await glob(globPatterns, { ignore });
+    const files = await glob(globPatterns, { ignore: mergedIgnore });
     const checkPromises = [];
 
     for (const file of files) {

@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: MIT
+
+name: Test E2E
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  test-e2e:
+    name: Test E2E
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Check SPDX headers
+        id: check-spdx-headers
+        uses: ./

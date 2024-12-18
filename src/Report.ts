@@ -6,8 +6,8 @@ import { Reporter } from "./Config.types";
 import stripIndent from "strip-indent";
 import indentString from "indent-string";
 
-const TITLE = "Check spdx headers";
-export const ALL_VALID = "All files have valid SPDX headers";
+const TITLE = "Check SPDX headers";
+export const ALL_VALID = "All files have valid headers";
 
 function getErrorsMarkdown(files: Result["files"]) {
   const lines = [];
@@ -31,7 +31,7 @@ function getErrorsMarkdown(files: Result["files"]) {
 
 function validFilesMessage(validFiles: number): string {
   if (validFiles > 0) {
-    return `✅ ${validFiles} ${pluralize(validFiles, "file")} have valid SPDX headers.`;
+    return `✅ ${validFiles} ${pluralize(validFiles, "file")} have valid headers.`;
   }
   return "";
 }
@@ -65,7 +65,7 @@ export function errorReport(
   reporter: Reporter = "text",
   result: Result,
 ): string {
-  const summary = `${result.errors.length} ${pluralize(result.errors.length, "error")} checking SPDX headers`;
+  const summary = `${result.errors.length} ${pluralize(result.errors.length, "error")} checking headers`;
 
   switch (reporter) {
     case "json":
@@ -80,7 +80,7 @@ export function errorReport(
         Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.
         
         ${validFilesMessage(result.validFiles)}
-        ❌ ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")} have problems in SPDX headers.
+        ❌ ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")} have problems in headers.
 
         Found ${result.errors.length} ${pluralize(result.invalidFiles, "error")}:
 

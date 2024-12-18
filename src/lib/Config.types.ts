@@ -25,7 +25,7 @@ export const ruleHeadersSchema = z
     files: z.union([globPatternSchema, z.array(globPatternSchema)]),
     license: z.union([licenseSchema, z.array(licenseSchema)]).optional(),
     ignore: ignoreSchema.optional(),
-    copyright: z.string().optional(),
+    copyright: z.union([z.string(), z.array(z.string())]).optional(),
   })
   .strict();
 
