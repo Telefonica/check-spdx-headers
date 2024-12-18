@@ -55889,6 +55889,8 @@ const inputOptionsSchema = z
     reporter: reporterSchema,
     failOnError: failOnErrorSchema,
     ignore: ignoreSchema,
+    configFile: z.string().optional(),
+    config: z.string().optional(),
 })
     .strict();
 
