@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 rules:
-  - name: "License"
+  - name: "Source code"
     headers:
       - files:
           - "**/*.js"
@@ -13,16 +13,26 @@ rules:
           - "*.config.js"
           - "src/lib/spdx-satisfies/**"
           - "script/**"
-      - files:
-          - "src/lib/spdx-satisfies/**"
-        license: "MIT"
+  - name: "Config files"
+    headers:
       - files:
           - "**/*.yml"
           - "*.config.js"
+        license:
+          - "MIT"
+          - "Apache-2.0"
+  - name: "Scripts"
+    headers:
+      - files:
           - "script/**"
         license:
           - "MIT"
           - "Apache-2.0"
+  - name: "Third party code"
+    headers:
+      - files:
+          - "src/lib/spdx-satisfies/**"
+        license: "MIT"
   - name: "Copyright"
     headers:
       - files:
