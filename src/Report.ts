@@ -64,10 +64,11 @@ export function successReport(
   reporter: Reporter = "text",
   result: Result,
 ): string {
+  const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\n${ALL_VALID}`;
   switch (reporter) {
     case "json":
       return JSON.stringify({
-        message: ALL_VALID,
+        message: summary,
         ...result,
       });
     case "markdown":
@@ -77,7 +78,7 @@ export function successReport(
         ${validFilesMessage(result.validFiles)}
       `);
     default:
-      return `${ALL_VALID}\nChecked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.`;
+      return summary;
   }
 }
 

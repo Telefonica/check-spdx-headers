@@ -65203,10 +65203,11 @@ function pluralize(count, singular) {
     return count === 1 ? singular : `${singular}s`;
 }
 function successReport(reporter = "text", result) {
+    const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\n${ALL_VALID}`;
     switch (reporter) {
         case "json":
             return JSON.stringify({
-                message: ALL_VALID,
+                message: summary,
                 ...result,
             });
         case "markdown":
@@ -65216,7 +65217,7 @@ function successReport(reporter = "text", result) {
         ${validFilesMessage(result.validFiles)}
       `);
         default:
-            return `${ALL_VALID}\nChecked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.`;
+            return summary;
     }
 }
 function errorReport(reporter = "text", result) {
