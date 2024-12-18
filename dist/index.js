@@ -64835,6 +64835,7 @@ class Checker {
     constructor(config) {
         this._logger = createLogger(config.log);
         this._config = config;
+        this._logger.verbose("Checker created with config", config);
     }
     /**
      * Get the logger
