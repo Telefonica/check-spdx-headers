@@ -6,9 +6,9 @@ import * as core from "@actions/core";
 import { getConfig } from "./Config";
 import { Checker } from "./lib/index";
 
-import { errorReport, successReport, ALL_VALID } from "./Report";
+import { getReport } from "./Report";
 
-const FAILED_MESSAGE = "Some files do not have a valid license";
+const FAILED_MESSAGE = "Some files do not have valid SPDX headers";
 const OUTPUT_REPORT = "report";
 
 /**
@@ -28,15 +28,14 @@ export async function run(): Promise<void> {
     });
     const result = await checker.check();
 
+    const report = getReport(options.reporter, result);
+    core.info(report);
+    core.setOutput(OUTPUT_REPORT, report);
+
     if (!result.valid) {
-      core.info(FAILED_MESSAGE);
-      core.setOutput(OUTPUT_REPORT, errorReport(options.reporter, result));
       if (options.failOnError) {
         core.setFailed(FAILED_MESSAGE);
       }
-    } else {
-      core.info(ALL_VALID);
-      core.setOutput(OUTPUT_REPORT, successReport(options.reporter, result));
     }
   } catch (error) {
     // Fail the workflow run if an error occurs

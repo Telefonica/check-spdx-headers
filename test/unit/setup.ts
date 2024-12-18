@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 jest.mock<typeof import("strip-indent")>("strip-indent", () => ({

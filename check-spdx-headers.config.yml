@@ -50,5 +50,5 @@ ignore:
   - "dist/**"
   - "coverage/**"
 failOnError: false
-reporter: "markdown"
+reporter: "text"
 log: "debug"

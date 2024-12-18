@@ -65162,7 +65162,7 @@ function indentString(string, count = 1, options = {}) {
 
 
 const TITLE = "Check SPDX headers";
-const ALL_VALID = "All files have valid headers";
+const ALL_VALID = "All files have valid headers.";
 function getErrorsMarkdown(files) {
     const lines = [];
     for (const file of files) {
@@ -65176,6 +65176,22 @@ function getErrorsMarkdown(files) {
         }
     }
     return lines;
+}
+function getErrorsText(files) {
+    const fileReports = [];
+    for (const file of files) {
+        const fileReport = [];
+        if (!file.valid) {
+            fileReport.push(`File '${file.file}':`);
+            for (const rule of file.result) {
+                if (!rule.valid) {
+                    fileReport.push(`${rule.errors.join(". ")}.`);
+                }
+            }
+            fileReports.push(fileReport.join(" "));
+        }
+    }
+    return fileReports.join("\n");
 }
 function validFilesMessage(validFiles) {
     if (validFiles > 0) {
@@ -65200,35 +65216,38 @@ function successReport(reporter = "text", result) {
         ${validFilesMessage(result.validFiles)}
       `);
         default:
-            return ALL_VALID;
+            return `${ALL_VALID}\nChecked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.`;
     }
 }
 function errorReport(reporter = "text", result) {
-    const summary = `${result.errors.length} ${pluralize(result.errors.length, "error")} checking headers`;
+    const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\nFound ${result.errors.length} ${pluralize(result.errors.length, "error")} in ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")}`;
     switch (reporter) {
         case "json":
             return JSON.stringify({
-                message: summary,
+                message: summary.replace(/\n/g, " "),
                 ...result,
             });
         case "markdown":
             return stripIndent(`
-        *${TITLE}*
+        __${TITLE}__
 
         Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.
         
         ${validFilesMessage(result.validFiles)}
-        ❌ ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")} have problems in headers.
-
-        Found ${result.errors.length} ${pluralize(result.invalidFiles, "error")}:
+        ❌ Found ${result.errors.length} ${pluralize(result.errors.length, "error")} in ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")}:
 
         ${getErrorsMarkdown(result.files)
                 .map((line, index) => (index > 0 ? indentString(line, 8) : line))
                 .join("\n")}
       `);
         default:
-            return summary;
+            return `${summary}:\n${getErrorsText(result.files)}`;
     }
+}
+function getReport(reporter, result) {
+    return result.valid
+        ? successReport(reporter, result)
+        : errorReport(reporter, result);
 }
 
 ;// CONCATENATED MODULE: ./src/main.ts
@@ -65238,7 +65257,7 @@ function errorReport(reporter = "text", result) {
 
 
 
-const FAILED_MESSAGE = "Some files do not have a valid license";
+const FAILED_MESSAGE = "Some files do not have valid SPDX headers";
 const OUTPUT_REPORT = "report";
 /**
  * The main function for the action.
@@ -65255,16 +65274,13 @@ async function run() {
             ignore: options.ignore,
         });
         const result = await checker.check();
+        const report = getReport(options.reporter, result);
+        core.info(report);
+        core.setOutput(OUTPUT_REPORT, report);
         if (!result.valid) {
-            core.info(FAILED_MESSAGE);
-            core.setOutput(OUTPUT_REPORT, errorReport(options.reporter, result));
             if (options.failOnError) {
                 core.setFailed(FAILED_MESSAGE);
             }
-        }
-        else {
-            core.info(ALL_VALID);
-            core.setOutput(OUTPUT_REPORT, successReport(options.reporter, result));
         }
     }
     catch (error) {
