@@ -30,6 +30,7 @@ inputs:
     required: false
   failOnError:
     description: 'Fail the action when the check fails'
+    type: boolean
     default: 'true'
   reporter:
     description: 'Reporter to use'

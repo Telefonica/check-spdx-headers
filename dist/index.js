@@ -56164,10 +56164,10 @@ function valueIfBoolean(value) {
      * I assigned a default value of true in the action.yml file, but it does not work as expected, at least in the action debugger.
      * To be verified.
      */
-    if (!(value in ["true", "True", "TRUE", "false", "False", "FALSE"])) {
+    if (!["true", "True", "TRUE", "false", "False", "FALSE"].includes(value)) {
         throw new Error("Invalid boolean value");
     }
-    return value in ["true", "True", "TRUE"];
+    return ["true", "True", "TRUE"].includes(value);
 }
 /**
  * Returns the inputs from the action.
