@@ -56137,7 +56137,7 @@ function fromError(err, options = {}) {
 //# sourceMappingURL=index.mjs.map
 ;// CONCATENATED MODULE: ./src/Config.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: FOO
 
 
 
@@ -64885,9 +64885,16 @@ class Checker {
                 return message;
             }
             const approvedLicenses = Array.isArray(license) ? license : [license];
-            if (!spdx_satisfies(spdxLicense, approvedLicenses)) {
-                const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
-                this.logger.debug(`${message} in file "${file}"`);
+            try {
+                if (!spdx_satisfies(spdxLicense, approvedLicenses)) {
+                    const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
+                    this.logger.debug(`${message} in file "${file}"`);
+                    return message;
+                }
+            }
+            catch (error) {
+                const message = `Error checking license: ${error.message}. Is the license a valid SPDX id?`;
+                this.logger.error(`${message} in file "${file}"`);
                 return message;
             }
         }
