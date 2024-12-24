@@ -12,6 +12,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  statuses: write
 
 jobs:
   build:
@@ -80,3 +82,21 @@ jobs:
         with:
           name: dist
           path: dist/
+  check-spdx-headers:
+    name: Check SPDX Headers
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Check SPDX headers
+        if: github.event_name != 'pull_request'
+        uses: ./
+
+      - name: Check SPDX headers
+        if: github.event_name == 'pull_request'
+        uses: ./.github/actions/check-and-comment
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

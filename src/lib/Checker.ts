@@ -92,9 +92,15 @@ export class Checker {
 
       const approvedLicenses = Array.isArray(license) ? license : [license];
 
-      if (!satisfies(spdxLicense, approvedLicenses)) {
-        const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
-        this.logger.debug(`${message} in file "${file}"`);
+      try {
+        if (!satisfies(spdxLicense, approvedLicenses)) {
+          const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
+          this.logger.debug(`${message} in file "${file}"`);
+          return message;
+        }
+      } catch (error) {
+        const message = `Error checking license: ${(error as Error).message}. Is "${spdxLicense}" a valid SPDX id?`;
+        this.logger.error(`${message} in file "${file}"`);
         return message;
       }
     }

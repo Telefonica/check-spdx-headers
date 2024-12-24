@@ -25,3 +25,6 @@ jobs:
       - name: Check SPDX headers
         id: check-spdx-headers
         uses: ./
+
+      # TODO: Add E2E tests, checking the output of different configurations
+      # We could use a github-script action to parse the json report and check the results of each different configuration
