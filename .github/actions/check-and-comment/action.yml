@@ -65,6 +65,6 @@ runs:
         issue-number: ${{ github.event.pull_request.number }}
         body: ${{ steps.check-spdx-headers.outputs.report }}
         edit-mode: replace
-    - if: ${{ steps.check-spdx-headers.outputs.report == 'false' }}
+    - if: ${{ steps.check-spdx-headers.outputs.valid == 'false' }}
       shell: bash
       run: echo "Check SPDX headers failed" && exit 1
