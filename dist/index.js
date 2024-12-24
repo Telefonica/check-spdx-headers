@@ -56137,7 +56137,7 @@ function fromError(err, options = {}) {
 //# sourceMappingURL=index.mjs.map
 ;// CONCATENATED MODULE: ./src/Config.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 
 
@@ -64893,7 +64893,7 @@ class Checker {
                 }
             }
             catch (error) {
-                const message = `Error checking license: ${error.message}. Is the license a valid SPDX id?`;
+                const message = `Error checking license: ${error.message}. Is "${spdxLicense}" a valid SPDX id?`;
                 this.logger.error(`${message} in file "${file}"`);
                 return message;
             }

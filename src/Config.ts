@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 import * as core from "@actions/core";
 import { parse } from "yaml";

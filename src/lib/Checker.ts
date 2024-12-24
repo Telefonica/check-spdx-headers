@@ -99,7 +99,7 @@ export class Checker {
           return message;
         }
       } catch (error) {
-        const message = `Error checking license: ${(error as Error).message}. Is the license a valid SPDX id?`;
+        const message = `Error checking license: ${(error as Error).message}. Is "${spdxLicense}" a valid SPDX id?`;
         this.logger.error(`${message} in file "${file}"`);
         return message;
       }
