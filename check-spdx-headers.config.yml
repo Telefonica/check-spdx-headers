@@ -16,6 +16,7 @@ rules:
   - name: "Config files"
     headers:
       - files:
+          - ".github/**/*.yml"
           - "**/*.yml"
           - "*.config.js"
         license:
@@ -36,6 +37,7 @@ rules:
   - name: "Copyright"
     headers:
       - files:
+          - ".github/**/*.yml"
           - "**/*.ts"
           - "**/*.js"
           - "**/*.yml"
