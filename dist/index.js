@@ -56137,7 +56137,7 @@ function fromError(err, options = {}) {
 //# sourceMappingURL=index.mjs.map
 ;// CONCATENATED MODULE: ./src/Config.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: Apache-2.0
 
 
 
