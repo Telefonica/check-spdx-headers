@@ -1,0 +1,69 @@
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: MIT
+
+name: Check SPDX Headers
+description: Check if the SPDX headers are valid and write a comment with the results
+
+permissions:
+  pull-requests: write
+  statuses: write
+
+inputs:
+  rules:
+    description: 'List of rules expressed as a YAML string'
+    multiline: true
+    required: false
+  ignore:
+    description: 'Glob pattern or list of glob patterns to ignore in all rules expressed as a YAML string'
+    multiline: true
+    required: false
+  log:
+    description: 'Log level'
+    type: choice
+    options:
+      - 'silly'
+      - 'debug'
+      - 'verbose'
+      - 'info'
+      - 'warn'
+      - 'error'
+      - 'silent'
+    required: false
+  config:
+    description: 'Configuration object expressed as a YAML string'
+    multiline: true
+    required: false
+  configFile:
+    description: 'Path to a configuration file'
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Check SPDX headers
+      id: check-spdx-headers
+      uses: ./
+      with:
+        rules: ${{ inputs.rules }}
+        ignore: ${{ inputs.ignore }}
+        log: ${{ inputs.log }}
+        config: ${{ inputs.config }}
+        configFile: ${{ inputs.configFile }}
+        failOnError: false
+        reporter: 'markdown'
+    - name: Find Comment
+      uses: peter-evans/find-comment@v3
+      id: previous-comment
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: Check SPDX headers
+    - name: Create or update comment
+      uses: peter-evans/create-or-update-comment@v4
+      with:
+        comment-id: ${{ steps.previous-comment.outputs.comment-id }}
+        issue-number: ${{ github.event.pull_request.number }}
+        body: ${{ steps.check-spdx-headers.outputs.report }}
+        edit-mode: replace
+    - if: ${{ steps.check-spdx-headers.outputs.report == 'false' }}
+      run: echo "Check SPDX headers failed" && exit 1

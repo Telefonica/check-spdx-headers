@@ -5,7 +5,6 @@ name: 'Check SPDX Headers'
 description: 'GitHub Action to check that all files have the correct SPDX headers'
 author: 'Telefónica Innovación Digital'
 
-# Define your inputs here.
 inputs:
   rules:
     description: 'List of rules expressed as a YAML string'
@@ -48,6 +47,11 @@ inputs:
   configFile:
     description: 'Path to a configuration file'
     default: 'check-spdx-headers.config.yml'
+outputs:
+  valid:
+    description: 'Whether the check passed or not'
+  report:
+    description: 'A report containing the results of the check'
 runs:
   using: node20
   main: dist/index.js

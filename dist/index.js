@@ -55888,7 +55888,7 @@ const inputOptionsSchema = z
     ...configSchema.shape,
     reporter: reporterSchema,
     failOnError: failOnErrorSchema,
-    ignore: ignoreSchema,
+    ignore: ignoreSchema.optional(),
     configFile: z.string().optional(),
     config: z.string().optional(),
 })
@@ -56255,7 +56255,7 @@ async function getConfig() {
     const mergedConfigWithDefaults = {
         ...mergedConfig,
         log: mergedConfig.log || "info",
-        failOnError: mergedConfig.failOnError || true,
+        failOnError: mergedConfig.failOnError === undefined ? true : mergedConfig.failOnError,
         reporter: mergedConfig.reporter || "text",
     };
     core.debug(`Configuration: ${JSON.stringify(mergedConfigWithDefaults)}`);
@@ -64621,6 +64621,11 @@ const chalkStderr = createChalk({level: stderrColor ? stderrColor.level : 0});
 
 
 const { combine, colorize, timestamp, printf } = (winston_default()).format;
+/**
+ * Print extra information to the log. Any object passed as a second argument to the winston logger will be printed as a gray json string due to this function.
+ * @param info The log information
+ * @returns A json string with the extra information.
+ */
 function printExtraInfo(info) {
     const objectToPrint = {};
     for (const key in info) {
@@ -64633,6 +64638,11 @@ function printExtraInfo(info) {
     }
     return `: ${source.gray(JSON.stringify(objectToPrint))}`;
 }
+/**
+ * Returns a winston logger
+ * @param level The log level
+ * @returns Winston logger
+ */
 function createLogger(level) {
     const logger = winston_default().createLogger({
         level: level || "info",
@@ -64843,6 +64853,12 @@ class Checker {
     get logger() {
         return this._logger;
     }
+    /**
+     * Get the SPDX header from a file content
+     * @param fileContent the content of the file
+     * @param headerName The name of the header to get
+     * @returns The value of the header or null if it does not exist
+     */
     _getSPDXHeader(fileContent, headerName) {
         const headerRegex = new RegExp(`SPDX-${headerName}: (.*)$`, "m");
         const match = fileContent.match(headerRegex);
@@ -64851,6 +64867,12 @@ class Checker {
         }
         return null;
     }
+    /**
+     * Check the license of a file
+     * @param file The file path to check
+     * @param license The approved license or licenses
+     * @returns An error message if the license is not valid or null if it is valid
+     */
     async _checkFileLicense(file, license) {
         this._logger.silly(`Checking file license`, { file, license });
         const stats = await (0,promises_namespaceObject.stat)(file);
@@ -64871,6 +64893,12 @@ class Checker {
         }
         return null;
     }
+    /**
+     * Check the copyright of a file
+     * @param file The file path to check
+     * @param license The approved copyright or copyrights
+     * @returns An error message if the copyright is not valid or null if it is valid
+     */
     async _checkFileCopyright(file, copyright) {
         this._logger.silly(`Checking file copyright`, { file, copyright });
         const fileContent = await (0,promises_namespaceObject.readFile)(file, "utf-8");
@@ -64900,6 +64928,13 @@ class Checker {
         }
         return null;
     }
+    /**
+     * Check a file for a rule
+     * @param file The file to check
+     * @param headers The headers to check
+     * @param rule The rule name
+     * @returns An object with the result of the check
+     */
     async _checkFile(file, headers, rule) {
         this._logger.debug(`Checking rule "${rule}" in file "${file}"`);
         const checkPromises = [];
@@ -64927,7 +64962,15 @@ class Checker {
             valid: true,
         };
     }
-    async checkRuleHeaders(filesHeaders, ruleName, headersIndex, ignore) {
+    /**
+     * Check the headers of a rule
+     * @param filesHeaders The headers to check
+     * @param ruleName The name of the rule
+     * @param headersIndex The index of the headers in the rule, used for reporting and debugging
+     * @param ignore The ignore patterns
+     * @returns An object with the result of the check
+     */
+    async _checkRuleHeaders(filesHeaders, ruleName, headersIndex, ignore) {
         let globPatterns = Array.isArray(filesHeaders.files)
             ? filesHeaders.files
             : [filesHeaders.files];
@@ -64962,6 +65005,11 @@ class Checker {
         this._logger.debug(`Result of ${headersName} in rule "${ruleName}"`, flatResult);
         return flatResult;
     }
+    /**
+     * Combine the results of the rules for a single file
+     * @param results The results of the rules
+     * @returns An array with the combined results for a single file
+     */
     _combineFileRuleResults(results) {
         const combinedResult = [];
         for (const result of results) {
@@ -64984,6 +65032,11 @@ class Checker {
         }
         return combinedResult;
     }
+    /**
+     * Combine the results of the rules for all files
+     * @param results The results of the rules
+     * @returns An array with the combined results for all files
+     */
     _combineFileRulesResults(results) {
         const combinedResult = [];
         for (const result of results) {
@@ -65017,6 +65070,11 @@ class Checker {
         }
         return combinedResult;
     }
+    /**
+     * Combine the errors of all files
+     * @param filesResults The results of the files
+     * @returns An array with all the errors of all files
+     */
     _combineErrors(filesResults) {
         const errors = [];
         for (const file of filesResults) {
@@ -65035,8 +65093,9 @@ class Checker {
     /**
      * Checks a single rule
      * @param rule The rule to check
+     * @returns An object with the result of the check
      */
-    async checkRule(rule) {
+    async _checkRule(rule) {
         this._logger.info(`Checking rule "${rule.name}"`);
         let ignore = undefined;
         if (rule.ignore) {
@@ -65054,7 +65113,7 @@ class Checker {
         const checkPromises = [];
         let i = 0;
         for (const header of rule.headers) {
-            checkPromises.push(this.checkRuleHeaders(header, rule.name, i, ignore));
+            checkPromises.push(this._checkRuleHeaders(header, rule.name, i, ignore));
             i++;
         }
         const results = await Promise.all(checkPromises);
@@ -65068,13 +65127,14 @@ class Checker {
     }
     /**
      * Checks all rules
+     * @returns An object with the result of the check
      */
     async check() {
         this._logger.info("Checking file headers");
         const rules = [...this._config.rules].reverse();
         const checkPromises = [];
         for (const rule of rules) {
-            checkPromises.push(this.checkRule(rule));
+            checkPromises.push(this._checkRule(rule));
         }
         const result = await Promise.all(checkPromises);
         const combinedResult = this._combineFileRulesResults(result);
@@ -65163,6 +65223,11 @@ function indentString(string, count = 1, options = {}) {
 
 const TITLE = "Check SPDX headers";
 const ALL_VALID = "All files have valid headers.";
+/**
+ * Get the errors in a markdown format
+ * @param files The files to get the errors from
+ * @returns The errors in markdown format
+ */
 function getErrorsMarkdown(files) {
     const lines = [];
     for (const file of files) {
@@ -65170,13 +65235,26 @@ function getErrorsMarkdown(files) {
             lines.push(`- File: ${file.file}`);
             for (const rule of file.result) {
                 if (!rule.valid) {
-                    lines.push(indentString(`- ${rule.rule}: ${rule.errors.join("\n")}`, 2));
+                    if (rule.errors.length === 1) {
+                        lines.push(indentString(`- ${rule.rule}: ${rule.errors[0]}`, 2));
+                    }
+                    else {
+                        lines.push(indentString(`- ${rule.rule}:`, 2));
+                        for (const error of rule.errors) {
+                            lines.push(indentString(`- ${error}`, 4));
+                        }
+                    }
                 }
             }
         }
     }
     return lines;
 }
+/**
+ * Return the text of the errors, grouped by file
+ * @param files The files to get the errors from
+ * @returns The text detailing the errors by file
+ */
 function getErrorsText(files) {
     const fileReports = [];
     for (const file of files) {
@@ -65193,26 +65271,51 @@ function getErrorsText(files) {
     }
     return fileReports.join("\n");
 }
+/**
+ * Pluralize a word by adding an 's' at the end
+ * @param count Number to check
+ * @param singular Singular form of the word
+ * @returns The word pluralized
+ */
+function pluralize(count, singular) {
+    return count === 1 ? singular : `${singular}s`;
+}
+/**
+ * Get a message with the number of valid files
+ * @param validFiles Number of valid files
+ * @returns The message
+ */
 function validFilesMessage(validFiles) {
     if (validFiles > 0) {
         return `✅ ${validFiles} ${pluralize(validFiles, "file")} have valid headers.`;
     }
     return "";
 }
-function pluralize(count, singular) {
-    return count === 1 ? singular : `${singular}s`;
+/**
+ * Replace new lines with spaces
+ * @param text Text to remove new lines from
+ * @returns The text without new lines
+ */
+function removeBlankLines(text) {
+    return text.replace(/\n/gm, " ");
 }
-function successReport(reporter = "text", result) {
+/**
+ * Report a successful check
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
+function successReport(reporter, result) {
     const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\n${ALL_VALID}`;
     switch (reporter) {
         case "json":
             return JSON.stringify({
-                message: summary,
+                message: removeBlankLines(summary),
                 ...result,
             });
         case "markdown":
             return stripIndent(`
-        *${TITLE}*
+        __${TITLE}__
 
         ${validFilesMessage(result.validFiles)}
       `);
@@ -65220,12 +65323,18 @@ function successReport(reporter = "text", result) {
             return summary;
     }
 }
-function errorReport(reporter = "text", result) {
+/**
+ * Report a failed check
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
+function errorReport(reporter, result) {
     const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\nFound ${result.errors.length} ${pluralize(result.errors.length, "error")} in ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")}`;
     switch (reporter) {
         case "json":
             return JSON.stringify({
-                message: summary.replace(/\n/g, " "),
+                message: removeBlankLines(summary),
                 ...result,
             });
         case "markdown":
@@ -65245,6 +65354,12 @@ function errorReport(reporter = "text", result) {
             return `${summary}:\n${getErrorsText(result.files)}`;
     }
 }
+/**
+ * Get the report in the specified format
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
 function getReport(reporter, result) {
     return result.valid
         ? successReport(reporter, result)
@@ -65260,6 +65375,7 @@ function getReport(reporter, result) {
 
 const FAILED_MESSAGE = "Some files do not have valid SPDX headers";
 const OUTPUT_REPORT = "report";
+const OUTPUT_VALID = "valid";
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -65278,6 +65394,7 @@ async function run() {
         const report = getReport(options.reporter, result);
         core.info(report);
         core.setOutput(OUTPUT_REPORT, report);
+        core.setOutput(OUTPUT_VALID, result.valid);
         if (!result.valid) {
             if (options.failOnError) {
                 core.setFailed(FAILED_MESSAGE);
