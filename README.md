@@ -6,7 +6,7 @@ Checks that files have the correct SPDX headers according to a given configurati
 
 - [Preface](#preface)
 - [Usage](#usage)
-- [PR comments](#pr-comments)
+  - [PR comments](#pr-comments)
 - [Configuration](#configuration)
   - [Configuration file](#configuration-file)
   - [Inputs](#inputs)
@@ -78,15 +78,15 @@ jobs:
 
 That's it! The action will check the SPDX headers of your files according to the configuration file on every push.
 
-## PR comments
+### PR comments
 
-This repository also includes a Github Composite Action that uses this action to check the SPDX headers and post the results in a comment in the PR. The action is called `check-spdx-headers-pr-comment`. You can use it in your workflow to get the results of the headers check in a PR.
+This repository also includes a Github Composite Action that uses this action to check the SPDX headers and post the results in a comment in the PR.
 
 ![PR comment](./docs/pr-comment.png)
 
 The composite action accepts the [same inputs as the main action](#inputs), except for:
   * `reporter` - The `reporter` option is always set to `markdown`.
-  * `failOnError` - The failOnError is always set to `false` to get the results and post them in a comment in the PR. After that, it automatically fails the workflow if there are files with incorrect headers.
+  * `failOnError` - The failOnError is always set to `false` to get the results and post them. After that, it automatically fails the workflow by forcing an error if there are files with incorrect headers.
 
 Here you have an example of a GitHub Actions workflow file using the `check-and-comment` action:
 
