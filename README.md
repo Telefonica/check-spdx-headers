@@ -6,6 +6,7 @@ Checks that files have the correct SPDX headers according to a given configurati
 
 - [Preface](#preface)
 - [Usage](#usage)
+- [PR comments](#pr-comments)
 - [Configuration](#configuration)
   - [Configuration file](#configuration-file)
   - [Inputs](#inputs)
@@ -13,6 +14,7 @@ Checks that files have the correct SPDX headers according to a given configurati
 - [License check](#license-check)
 - [Copyright check](#copyright-check)
 - [Outputs](#outputs)
+- [File patterns](#file-patterns)
 - [Organizing rules](#organizing-rules)
 - [Ignoring files](#ignoring-files)
 - [Contributing](#contributing)
@@ -30,6 +32,8 @@ This action enables to configure checks for the following [SPDX headers](https:/
 
 * [License](#license-check)
 * [Copyright](#copyright-check)
+
+For better user experience in PRs, this repository also includes a Github Composite Action that uses this action to check the SPDX headers and post the results in a comment in the PR. Read the [PR comments](#pr-comments) section for more information.
 
 ## Usage
 
@@ -74,6 +78,42 @@ jobs:
 
 That's it! The action will check the SPDX headers of your files according to the configuration file on every push.
 
+## PR comments
+
+This repository also includes a Github Composite Action that uses this action to check the SPDX headers and post the results in a comment in the PR. The action is called `check-spdx-headers-pr-comment`. You can use it in your workflow to get the results of the headers check in a PR.
+
+![PR comment](./docs/pr-comment.png)
+
+The composite action accepts the [same inputs as the main action](#inputs), except for:
+  * `reporter` - The `reporter` option is always set to `markdown`.
+  * `failOnError` - The failOnError is always set to `false` to get the results and post them in a comment in the PR. After that, it automatically fails the workflow if there are files with incorrect headers.
+
+Here you have an example of a GitHub Actions workflow file using the `check-and-comment` action:
+
+```yaml
+name: Check SPDX headers
+
+on: pull_request
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  check-spdx-headers:
+    name: Check SPDX Headers
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check SPDX headers
+        uses: Telefonica/check-spdx-headers/.github/actions/check-and-comment@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
 ## Configuration
 
 ### Configuration file
@@ -83,7 +123,7 @@ The configuration file is a YAML file that must be placed at the root of your re
 * `rules`: List of rules to enforce. Each rule must contain the following properties:
   * `name`: Name of the rule. Useful to identify the rule in the output.
   * `headers`: List of files/headers to check, containing the following properties:
-    * `files`: File glob pattern to match the files to check or list of glob patterns.
+    * `files`: File glob pattern to match the files to check or list of glob patterns. Further info in the [File patterns](#file-patterns) section.
     * `license`: License or list of approved licenses that the files must have. Approved licenses __may be simple SPDX license identifiers like _MIT_, plus-ranges like _EPL-2.0+_, or licenses with exceptions like _Apache-2.0 WITH LLVM_.__ They may not be compound expressions using AND or OR. Further info in the [License](#license) section.
     * `copyright`: Copyright or list of approved copyrights that the files must have. They can be __simple strings or regular expressions__. Further info in the [Copyright](#copyright) section.
     * `ignore`: File glob pattern or list of file glob patterns to ignore in this specific headers check.
@@ -276,6 +316,17 @@ The action returns the following outputs:
   * `text`: Generates a text report. This is the default reporter.
   * `markdown`: Generates a markdown report. This is very useful if you want to send the results to a GitHub comment in a PR, for example.
   * `json`: Generates a JSON report. This is useful if you want to process the results in a script, for example. __Note that Github Actions outputs are always strings, so you will need to parse the JSON in your workflow.__ The JSON report contains all details about the headers check, including the files that have failed the check, details about the errors, the rule that produced them, etc.
+
+## File patterns
+
+File patterns are used to match the files that will be checked. They are defined using the [glob pattern syntax](https://en.wikipedia.org/wiki/Glob_(programming)).
+
+The action uses the [glob](https://github.com/isaacs/node-glob) package to match the files. So, take into account next considerations:
+
+* The glob patterns are matched using the default option `dot: false`. That means that the patterns will not match files or directories that start with a dot unless the pattern explicitly starts with a dot.
+
+> [!IMPORTANT]
+> You have to explicitly include the dot in the pattern if you want to match files or directories that start with a dot. For example, to match files in the ".github" directory, you have to use the pattern `".github/**"`.
 
 ## Organizing rules
 
