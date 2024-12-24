@@ -9,6 +9,11 @@ import indentString from "indent-string";
 const TITLE = "Check SPDX headers";
 export const ALL_VALID = "All files have valid headers.";
 
+/**
+ * Get the errors in a markdown format
+ * @param files The files to get the errors from
+ * @returns The errors in markdown format
+ */
 function getErrorsMarkdown(files: Result["files"]) {
   const lines = [];
 
@@ -18,9 +23,14 @@ function getErrorsMarkdown(files: Result["files"]) {
 
       for (const rule of file.result) {
         if (!rule.valid) {
-          lines.push(
-            indentString(`- ${rule.rule}: ${rule.errors.join("\n")}`, 2),
-          );
+          if (rule.errors.length === 1) {
+            lines.push(indentString(`- ${rule.rule}: ${rule.errors[0]}`, 2));
+          } else {
+            lines.push(indentString(`- ${rule.rule}:`, 2));
+            for (const error of rule.errors) {
+              lines.push(indentString(`- ${error}`, 4));
+            }
+          }
         }
       }
     }
@@ -29,6 +39,11 @@ function getErrorsMarkdown(files: Result["files"]) {
   return lines;
 }
 
+/**
+ * Return the text of the errors, grouped by file
+ * @param files The files to get the errors from
+ * @returns The text detailing the errors by file
+ */
 function getErrorsText(files: Result["files"]) {
   const fileReports = [];
 
@@ -49,6 +64,21 @@ function getErrorsText(files: Result["files"]) {
   return fileReports.join("\n");
 }
 
+/**
+ * Pluralize a word by adding an 's' at the end
+ * @param count Number to check
+ * @param singular Singular form of the word
+ * @returns The word pluralized
+ */
+function pluralize(count: number, singular: string): string {
+  return count === 1 ? singular : `${singular}s`;
+}
+
+/**
+ * Get a message with the number of valid files
+ * @param validFiles Number of valid files
+ * @returns The message
+ */
 function validFilesMessage(validFiles: number): string {
   if (validFiles > 0) {
     return `✅ ${validFiles} ${pluralize(validFiles, "file")} have valid headers.`;
@@ -56,24 +86,32 @@ function validFilesMessage(validFiles: number): string {
   return "";
 }
 
-function pluralize(count: number, singular: string): string {
-  return count === 1 ? singular : `${singular}s`;
+/**
+ * Replace new lines with spaces
+ * @param text Text to remove new lines from
+ * @returns The text without new lines
+ */
+function removeBlankLines(text: string): string {
+  return text.replace(/\n/gm, " ");
 }
 
-export function successReport(
-  reporter: Reporter = "text",
-  result: Result,
-): string {
+/**
+ * Report a successful check
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
+export function successReport(reporter: Reporter, result: Result): string {
   const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\n${ALL_VALID}`;
   switch (reporter) {
     case "json":
       return JSON.stringify({
-        message: summary,
+        message: removeBlankLines(summary),
         ...result,
       });
     case "markdown":
       return stripIndent(`
-        *${TITLE}*
+        __${TITLE}__
 
         ${validFilesMessage(result.validFiles)}
       `);
@@ -82,16 +120,19 @@ export function successReport(
   }
 }
 
-export function errorReport(
-  reporter: Reporter = "text",
-  result: Result,
-): string {
+/**
+ * Report a failed check
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
+export function errorReport(reporter: Reporter, result: Result): string {
   const summary = `Checked ${result.checkedFiles} ${pluralize(result.checkedFiles, "file")}.\nFound ${result.errors.length} ${pluralize(result.errors.length, "error")} in ${result.invalidFiles} ${pluralize(result.invalidFiles, "file")}`;
 
   switch (reporter) {
     case "json":
       return JSON.stringify({
-        message: summary.replace(/\n/g, " "),
+        message: removeBlankLines(summary),
         ...result,
       });
     case "markdown":
@@ -112,6 +153,12 @@ export function errorReport(
   }
 }
 
+/**
+ * Get the report in the specified format
+ * @param reporter The reporter to use
+ * @param result The result of the check
+ * @returns The report in the specified format
+ */
 export function getReport(reporter: Reporter, result: Result): string {
   return result.valid
     ? successReport(reporter, result)

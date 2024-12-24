@@ -15,7 +15,7 @@ inputs:
     description: 'Glob pattern or list of glob patterns to ignore in all rules expressed as a YAML string'
     multiline: true
     required: false
-  logs:
+  log:
     description: 'Log level'
     type: choice
     options:

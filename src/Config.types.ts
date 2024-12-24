@@ -18,7 +18,7 @@ export const inputOptionsSchema = z
     ...configSchema.shape,
     reporter: reporterSchema,
     failOnError: failOnErrorSchema,
-    ignore: ignoreSchema,
+    ignore: ignoreSchema.optional(),
     configFile: z.string().optional(),
     config: z.string().optional(),
   })

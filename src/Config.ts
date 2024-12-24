@@ -145,7 +145,8 @@ export async function getConfig(): Promise<InputOptions> {
   const mergedConfigWithDefaults = {
     ...mergedConfig,
     log: mergedConfig.log || "info",
-    failOnError: mergedConfig.failOnError || true,
+    failOnError:
+      mergedConfig.failOnError === undefined ? true : mergedConfig.failOnError,
     reporter: mergedConfig.reporter || "text",
   };
 

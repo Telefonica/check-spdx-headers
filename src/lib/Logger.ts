@@ -7,6 +7,11 @@ const { combine, colorize, timestamp, printf } = winston.format;
 
 import type { LogLevel } from "./Logger.types";
 
+/**
+ * Print extra information to the log. Any object passed as a second argument to the winston logger will be printed as a gray json string due to this function.
+ * @param info The log information
+ * @returns A json string with the extra information.
+ */
 function printExtraInfo(info: winston.Logform.TransformableInfo) {
   const objectToPrint: Record<string, unknown> = {};
 
@@ -22,6 +27,11 @@ function printExtraInfo(info: winston.Logform.TransformableInfo) {
   return `: ${chalk.gray(JSON.stringify(objectToPrint))}`;
 }
 
+/**
+ * Returns a winston logger
+ * @param level The log level
+ * @returns Winston logger
+ */
 export function createLogger(level?: LogLevel) {
   const logger = winston.createLogger({
     level: level || "info",

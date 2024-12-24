@@ -10,6 +10,7 @@ import { getReport } from "./Report";
 
 const FAILED_MESSAGE = "Some files do not have valid SPDX headers";
 const OUTPUT_REPORT = "report";
+const OUTPUT_VALID = "valid";
 
 /**
  * The main function for the action.
@@ -31,6 +32,7 @@ export async function run(): Promise<void> {
     const report = getReport(options.reporter, result);
     core.info(report);
     core.setOutput(OUTPUT_REPORT, report);
+    core.setOutput(OUTPUT_VALID, result.valid);
 
     if (!result.valid) {
       if (options.failOnError) {

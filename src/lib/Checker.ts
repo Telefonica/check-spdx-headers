@@ -42,6 +42,12 @@ export class Checker {
     return this._logger;
   }
 
+  /**
+   * Get the SPDX header from a file content
+   * @param fileContent the content of the file
+   * @param headerName The name of the header to get
+   * @returns The value of the header or null if it does not exist
+   */
   private _getSPDXHeader(
     fileContent: string,
     headerName: string,
@@ -57,6 +63,12 @@ export class Checker {
     return null;
   }
 
+  /**
+   * Check the license of a file
+   * @param file The file path to check
+   * @param license The approved license or licenses
+   * @returns An error message if the license is not valid or null if it is valid
+   */
   private async _checkFileLicense(
     file: string,
     license: string | string[],
@@ -90,6 +102,12 @@ export class Checker {
     return null;
   }
 
+  /**
+   * Check the copyright of a file
+   * @param file The file path to check
+   * @param license The approved copyright or copyrights
+   * @returns An error message if the copyright is not valid or null if it is valid
+   */
   private async _checkFileCopyright(
     file: string,
     copyright: string | string[],
@@ -131,6 +149,13 @@ export class Checker {
     return null;
   }
 
+  /**
+   * Check a file for a rule
+   * @param file The file to check
+   * @param headers The headers to check
+   * @param rule The rule name
+   * @returns An object with the result of the check
+   */
   private async _checkFile(
     file: string,
     headers: RuleHeaders,
@@ -165,7 +190,15 @@ export class Checker {
     };
   }
 
-  public async checkRuleHeaders(
+  /**
+   * Check the headers of a rule
+   * @param filesHeaders The headers to check
+   * @param ruleName The name of the rule
+   * @param headersIndex The index of the headers in the rule, used for reporting and debugging
+   * @param ignore The ignore patterns
+   * @returns An object with the result of the check
+   */
+  private async _checkRuleHeaders(
     filesHeaders: RuleHeaders,
     ruleName: string,
     headersIndex: number,
@@ -219,6 +252,11 @@ export class Checker {
     return flatResult;
   }
 
+  /**
+   * Combine the results of the rules for a single file
+   * @param results The results of the rules
+   * @returns An array with the combined results for a single file
+   */
   private _combineFileRuleResults(results: RuleResult[]): RuleResult["result"] {
     const combinedResult: RuleResult["result"] = [];
 
@@ -247,6 +285,11 @@ export class Checker {
     return combinedResult;
   }
 
+  /**
+   * Combine the results of the rules for all files
+   * @param results The results of the rules
+   * @returns An array with the combined results for all files
+   */
   private _combineFileRulesResults(results: RuleResult[]): FileRulesResults[] {
     const combinedResult: FileRulesResults[] = [];
 
@@ -286,6 +329,11 @@ export class Checker {
     return combinedResult;
   }
 
+  /**
+   * Combine the errors of all files
+   * @param filesResults The results of the files
+   * @returns An array with all the errors of all files
+   */
   private _combineErrors(filesResults: FileRulesResults[]): FileError[] {
     const errors: FileError[] = [];
 
@@ -307,8 +355,9 @@ export class Checker {
   /**
    * Checks a single rule
    * @param rule The rule to check
+   * @returns An object with the result of the check
    */
-  public async checkRule(rule: Rule): Promise<RuleResult> {
+  private async _checkRule(rule: Rule): Promise<RuleResult> {
     this._logger.info(`Checking rule "${rule.name}"`);
 
     let ignore: Rule["ignore"] = undefined;
@@ -332,7 +381,7 @@ export class Checker {
     let i = 0;
 
     for (const header of rule.headers) {
-      checkPromises.push(this.checkRuleHeaders(header, rule.name, i, ignore));
+      checkPromises.push(this._checkRuleHeaders(header, rule.name, i, ignore));
       i++;
     }
 
@@ -351,6 +400,7 @@ export class Checker {
 
   /**
    * Checks all rules
+   * @returns An object with the result of the check
    */
   public async check(): Promise<Result> {
     this._logger.info("Checking file headers");
@@ -359,7 +409,7 @@ export class Checker {
     const checkPromises = [];
 
     for (const rule of rules) {
-      checkPromises.push(this.checkRule(rule));
+      checkPromises.push(this._checkRule(rule));
     }
 
     const result = await Promise.all(checkPromises);
