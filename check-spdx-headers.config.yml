@@ -51,6 +51,7 @@ ignore:
   - "**/node_modules/**"
   - "dist/**"
   - "coverage/**"
+  - ".github/ISSUE_TEMPLATE/**"
 failOnError: false
 reporter: "text"
 log: "debug"
