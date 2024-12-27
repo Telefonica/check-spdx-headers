@@ -33,14 +33,14 @@ This action enables to configure checks for the following [SPDX headers](https:/
 * [License](#license-check)
 * [Copyright](#copyright-check)
 
-For better user experience in PRs, this repository also includes a Github Composite Action that uses this action to check the SPDX headers and post the results in a comment in the PR. Read the [PR comments](#pr-comments) section for more information.
+For better user experience in PRs, this repository also includes a Github Composite Action that checks the SPDX headers and posts the results into a comment in the PR. Read the [PR comments](#pr-comments) section for more information.
 
 ## Usage
 
-Create a configuration file `check-spdx-headers.config.yml` at the root of your repository, containing the rules that you want to enforce.
+Create a configuration file `check-spdx-headers.config.yml` at the root of your repository, containing the [rules that you want to enforce](#configuration).
 
 > [!NOTE]
-> Using a configuration file is optional. You can also use the action inputs to define the configuration.
+> Using a [configuration file](#configuration-file) is optional. You can also use the [action inputs](#inputs) to define the [configuration](#configuration).
 
 ```yaml
 # SPDX headers configuration
