@@ -82,6 +82,22 @@ jobs:
         with:
           name: dist
           path: dist/
+  check-license-compliance:
+    name: Check License Compliance
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check License Compliance
+        if: github.event_name != 'pull_request'
+        uses: Telefonica/check-license-compliance@v0.1.0
+
+      - name: Check License Compliance
+        if: github.event_name == 'pull_request'
+        uses: Telefonica/check-license-compliance/.github/actions/check-and-comment@v0.1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check-spdx-headers:
     name: Check SPDX Headers
     runs-on: ubuntu-latest
