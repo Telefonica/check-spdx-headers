@@ -86,7 +86,7 @@ This repository also includes a Github Composite Action that uses this action to
 
 The composite action accepts the [same inputs as the main action](#inputs), except for:
   * `reporter` - The `reporter` option is always set to `markdown`.
-  * `failOnError` - The failOnError is always set to `false` to get the results and post them. After that, it automatically fails the workflow by forcing an error if there are files with incorrect headers.
+  * `fail-on-not-valid` - The `fail-on-not-valid` option is always set to `false` to get the results and post them. After that, it automatically fails the workflow by forcing an error if there are files with incorrect headers.
 
 Here you have an example of a GitHub Actions workflow file using the `check-and-comment` action:
 
@@ -131,16 +131,16 @@ The configuration file is a YAML file that must be placed at the root of your re
 * `ignore`: File glob pattern or list of file glob patterns to ignore in all rules.
 * `reporter`: Reporter to use. Possible values are `text`, `markdown` and `json`. Default is `text`. Further info in the [Reporters](#reporters) section.
 * `log`: Log level to use. Possible values are `silly`, `debug`, `info`, `warning` and `error`. Default is `info`. This option enables logs for the headers check. You can also enable logs for the action itself _(useful if you find any problem while the action is loading the configuration, for example)_ by setting the `ACTIONS_STEP_DEBUG` secret to `true`.
-* `failOnError`: Boolean value to determine if the action should fail when a file does not have the correct headers. Default is `true`. You can disable it and get the results in the output if you want to send the results to a Github comment in a PR, for example. See the [Outputs](#outputs) section for more info.
+* `failOnNotValid`: Boolean value to determine if the action should fail (exit code 1) when a file does not have the correct headers. Default is `true`. You can disable it and get the results in the output if you want to send the results to a Github comment in a PR, for example. See the [Outputs](#outputs) section for more info.
 
 ### Inputs
 
 The action also allows to set the configuration by using inputs. When defined, they will override the values in the [configuration file](#configuration-file). The inputs are:
 
-* `configFile`: Path to the configuration file. Default is `check-spdx-headers.config.yml`.
+* `config-file`: Path to the configuration file. Default is `check-spdx-headers.config.yml`.
 * `reporter`: Reporter to use. Possible values are `text`, `markdown` and `json`. Default is `text`.
 * `log`: Log level to use. Possible values are `silly`, `debug`, `info`, `warning` and `error`. Default is `info`.
-* `failOnError`: Boolean value to determine if the action should fail when a file does not have the correct headers. Default is `true`.
+* `fail-on-not-valid`: Boolean value to determine if the action should fail when a file does not have the correct headers. Default is `true`.
 * `ignore`: Multiline string with file glob pattern or list of file glob patterns to ignore in all headers checks expressed as a YAML list.    
     Example:
 
@@ -177,6 +177,9 @@ The action also allows to set the configuration by using inputs. When defined, t
       reporter: "markdown"
       log: "debug"
     ```
+
+> [!WARNING]
+> Note that some properties are defined in camelCase in the configuration file, while they are defined in kebab-case in the inputs. This is because the configuration file tries to follow NodeJs conventions in order to pass the values directly to the underlying library, while the inputs follow a GitHub Actions convention.
 
 ### Configuration example
 
@@ -223,11 +226,11 @@ jobs:
         id: check-spdx-headers
         uses: Telefonica/check-spdx-headers@v1
         with:
-          configFile: "spdx.config.yml"
+          config-file: "spdx.config.yml"
           # Properties with preference over values defined in any other place
           reporter: "markdown"
           log: "debug"
-          failOnError: false
+          fail-on-not-valid: true
           # Properties overriding the values in the configuration file and in the "config" input
           ignore: |
             - "**/dist/**"

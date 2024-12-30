@@ -5,8 +5,8 @@ import * as core from "@actions/core";
 import { parse } from "yaml";
 import { readFile } from "fs/promises";
 import { existsSync } from "fs";
-import { inputOptionsSchema } from "./Config.types";
-import type { InputOptions } from "./Config.types";
+import { allConfigSchema } from "./Config.types";
+import type { InputOptions, AllConfig } from "./Config.types";
 import { fromError } from "zod-validation-error";
 
 /**
@@ -45,16 +45,16 @@ function valueIfBoolean(value: string): boolean | undefined {
 function getInputs() {
   const rules = core.getMultilineInput("rules").join("\n");
   const log = core.getInput("log");
-  const failOnError = core.getInput("failOnError");
+  const failOnNotValid = core.getInput("fail-on-not-valid");
   const reporter = core.getInput("reporter");
   const config = core.getMultilineInput("config").join("\n");
-  const configFile = core.getInput("configFile");
+  const configFile = core.getInput("config-file");
   const ignore = core.getMultilineInput("ignore").join("\n");
 
   const inputs = {
     rules: valueIfDefined(rules),
     log: valueIfDefined(log),
-    failOnError: valueIfBoolean(failOnError),
+    failOnNotValid: valueIfBoolean(failOnNotValid),
     reporter: valueIfDefined(reporter),
     config: valueIfDefined(config),
     configFile: valueIfDefined(configFile),
@@ -99,17 +99,23 @@ async function loadConfigFile(configFile: string) {
  * Returns the configuration from the action inputs, loading configuration files if needed and parsing the inputs accordingly.
  * @returns The configuration from the action inputs and configuration files.
  */
-export async function getConfig(): Promise<InputOptions> {
+export async function getConfig(): Promise<AllConfig> {
   const inputs = getInputs();
-  let config: Partial<InputOptions> = {};
-  let configFromFile: Partial<InputOptions> = {};
-  let parsedInputs: Partial<InputOptions> = {};
+  let parsedConfig: Partial<AllConfig> = {};
+  let configFromFile: Partial<AllConfig> = {};
+  const parsedInputs: Partial<AllConfig> = {};
 
   if (inputs.config) {
     core.debug("Parsing the config option from the inputs");
-    config = parseYamlConfig(inputs.config);
-    core.debug(`Parsed config option from inputs: ${JSON.stringify(config)}`);
+    parsedConfig = parseYamlConfig(inputs.config);
+    core.debug(
+      `Parsed config option from inputs: ${JSON.stringify(parsedConfig)}`,
+    );
   }
+
+  configFromFile = await loadConfigFile(
+    inputs.configFile || "check-spdx-headers.config.yml",
+  );
 
   if (inputs.rules) {
     core.debug("Parsing the rules object from the inputs");
@@ -127,15 +133,23 @@ export async function getConfig(): Promise<InputOptions> {
     );
   }
 
-  configFromFile = await loadConfigFile(
-    inputs.configFile || "check-spdx-headers.config.yml",
-  );
+  const inputsValues: InputOptions = {};
+  if (inputs.log) {
+    inputsValues.log = inputs.log as InputOptions["log"];
+  }
+  if (inputs.reporter) {
+    inputsValues.reporter = inputs.reporter as InputOptions["reporter"];
+  }
+  if (inputs.failOnNotValid !== undefined) {
+    inputsValues.failOnNotValid =
+      inputs.failOnNotValid as InputOptions["failOnNotValid"];
+  }
 
   const mergedConfig = {
     ...configFromFile,
-    ...config,
-    ...inputs,
+    ...parsedConfig,
     ...parsedInputs,
+    ...inputsValues,
   };
 
   core.debug(
@@ -145,14 +159,16 @@ export async function getConfig(): Promise<InputOptions> {
   const mergedConfigWithDefaults = {
     ...mergedConfig,
     log: mergedConfig.log || "info",
-    failOnError:
-      mergedConfig.failOnError === undefined ? true : mergedConfig.failOnError,
+    failOnNotValid:
+      mergedConfig.failOnNotValid === undefined
+        ? true
+        : mergedConfig.failOnNotValid,
     reporter: mergedConfig.reporter || "text",
   };
 
   core.debug(`Configuration: ${JSON.stringify(mergedConfigWithDefaults)}`);
 
-  const result = inputOptionsSchema.safeParse(mergedConfigWithDefaults);
+  const result = allConfigSchema.safeParse(mergedConfigWithDefaults);
 
   if (!result.success) {
     core.error("Error validating the configuration");
