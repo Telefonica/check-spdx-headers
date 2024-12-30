@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 licenses:
-  allowed:
+  allowed: []
   warning:
     - Apache-2.0
     - MIT
