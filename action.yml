@@ -27,8 +27,8 @@ inputs:
       - 'silent'
     default: 'info'
     required: false
-  failOnError:
-    description: 'Fail the action when the check fails'
+  fail-on-not-valid:
+    description: 'Fail the action (exit with code 1) if the check is not valid'
     type: boolean
     default: 'true'
   reporter:
@@ -44,7 +44,7 @@ inputs:
     description: 'Configuration object expressed as a YAML string'
     multiline: true
     required: false
-  configFile:
+  config-file:
     description: 'Path to a configuration file'
     default: 'check-spdx-headers.config.yml'
 outputs:

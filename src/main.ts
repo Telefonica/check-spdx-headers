@@ -35,7 +35,7 @@ export async function run(): Promise<void> {
     core.setOutput(OUTPUT_VALID, result.valid);
 
     if (!result.valid) {
-      if (options.failOnError) {
+      if (options.failOnNotValid) {
         core.setFailed(FAILED_MESSAGE);
       }
     }

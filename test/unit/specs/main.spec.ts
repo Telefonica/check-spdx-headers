@@ -63,16 +63,16 @@ describe("action", () => {
   });
 
   describe("configuration", () => {
-    it("should set failOnError as true by default", async () => {
+    it("should set failOnNotValid as true by default", async () => {
       const config = await getConfig();
 
-      expect(config.failOnError).toBe(true);
+      expect(config.failOnNotValid).toBe(true);
     });
 
-    it("should throw when failOnError has not a boolean value", async () => {
+    it("should throw when failOnNotValid has not a boolean value", async () => {
       getInputMock.mockImplementation((name: string) => {
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (name === "failOnError") {
+        if (name === "fail-on-not-valid") {
           return "foo";
         }
         return "";
@@ -288,10 +288,10 @@ reporter: json
       expect(setOutputMock).toHaveBeenNthCalledWith(2, "valid", false);
     });
 
-    it("should set the action as failed if failOnError is true", async () => {
+    it("should set the action as failed if failOnNotValid is true", async () => {
       getInputMock.mockImplementation((name: string) => {
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (name === "failOnError") {
+        if (name === "fail-on-not-valid") {
           return "true";
         }
         return "";
@@ -318,10 +318,10 @@ reporter: json
       );
     });
 
-    it("should not set the action as failed if failOnError option is false", async () => {
+    it("should not set the action as failed if failOnNotValid option is false", async () => {
       getInputMock.mockImplementation((name: string) => {
         // eslint-disable-next-line jest/no-conditional-in-test
-        if (name === "failOnError") {
+        if (name === "fail-on-not-valid") {
           return "false";
         }
         return "";

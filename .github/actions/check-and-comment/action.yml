@@ -33,7 +33,7 @@ inputs:
     description: 'Configuration object expressed as a YAML string'
     multiline: true
     required: false
-  configFile:
+  config-file:
     description: 'Path to a configuration file'
     required: false
 
@@ -48,8 +48,8 @@ runs:
         ignore: ${{ inputs.ignore }}
         log: ${{ inputs.log }}
         config: ${{ inputs.config }}
-        configFile: ${{ inputs.configFile }}
-        failOnError: false
+        config-file: ${{ inputs.config-file }}
+        fail-on-not-valid: false
         reporter: 'markdown'
     - name: Find Comment
       uses: peter-evans/find-comment@v3

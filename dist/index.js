@@ -55881,18 +55881,20 @@ const configSchema = z
 // SPDX-License-Identifier: Apache-2.0
 
 
+
 const reporterSchema = z.enum(["json", "markdown", "text"]).optional();
-const failOnErrorSchema = z.boolean().optional();
+const failOnNotValidSchema = z.boolean().optional();
 const inputOptionsSchema = z
     .object({
-    ...configSchema.shape,
+    log: logLevelSchema.optional(),
     reporter: reporterSchema,
-    failOnError: failOnErrorSchema,
-    ignore: ignoreSchema.optional(),
-    configFile: z.string().optional(),
-    config: z.string().optional(),
+    failOnNotValid: failOnNotValidSchema,
 })
     .strict();
+const allConfigSchema = z.object({
+    ...configSchema.shape,
+    ...inputOptionsSchema.shape,
+});
 
 ;// CONCATENATED MODULE: ./node_modules/zod-validation-error/dist/index.mjs
 // lib/isZodErrorLike.ts
@@ -56178,15 +56180,15 @@ function valueIfBoolean(value) {
 function getInputs() {
     const rules = core.getMultilineInput("rules").join("\n");
     const log = core.getInput("log");
-    const failOnError = core.getInput("failOnError");
+    const failOnNotValid = core.getInput("fail-on-not-valid");
     const reporter = core.getInput("reporter");
     const config = core.getMultilineInput("config").join("\n");
-    const configFile = core.getInput("configFile");
+    const configFile = core.getInput("config-file");
     const ignore = core.getMultilineInput("ignore").join("\n");
     const inputs = {
         rules: valueIfDefined(rules),
         log: valueIfDefined(log),
-        failOnError: valueIfBoolean(failOnError),
+        failOnNotValid: valueIfBoolean(failOnNotValid),
         reporter: valueIfDefined(reporter),
         config: valueIfDefined(config),
         configFile: valueIfDefined(configFile),
@@ -56226,14 +56228,15 @@ async function loadConfigFile(configFile) {
  */
 async function getConfig() {
     const inputs = getInputs();
-    let config = {};
+    let parsedConfig = {};
     let configFromFile = {};
-    let parsedInputs = {};
+    const parsedInputs = {};
     if (inputs.config) {
         core.debug("Parsing the config option from the inputs");
-        config = parseYamlConfig(inputs.config);
-        core.debug(`Parsed config option from inputs: ${JSON.stringify(config)}`);
+        parsedConfig = parseYamlConfig(inputs.config);
+        core.debug(`Parsed config option from inputs: ${JSON.stringify(parsedConfig)}`);
     }
+    configFromFile = await loadConfigFile(inputs.configFile || "check-spdx-headers.config.yml");
     if (inputs.rules) {
         core.debug("Parsing the rules object from the inputs");
         parsedInputs.rules = parseYamlConfig(inputs.rules);
@@ -56244,22 +56247,34 @@ async function getConfig() {
         parsedInputs.ignore = parseYamlConfig(inputs.ignore);
         core.debug(`Parsed ignore option from inputs: ${JSON.stringify(parsedInputs.ignore)}`);
     }
-    configFromFile = await loadConfigFile(inputs.configFile || "check-spdx-headers.config.yml");
+    const inputsValues = {};
+    if (inputs.log) {
+        inputsValues.log = inputs.log;
+    }
+    if (inputs.reporter) {
+        inputsValues.reporter = inputs.reporter;
+    }
+    if (inputs.failOnNotValid !== undefined) {
+        inputsValues.failOnNotValid =
+            inputs.failOnNotValid;
+    }
     const mergedConfig = {
         ...configFromFile,
-        ...config,
-        ...inputs,
+        ...parsedConfig,
         ...parsedInputs,
+        ...inputsValues,
     };
     core.debug(`Configuration without default values: ${JSON.stringify(mergedConfig)}`);
     const mergedConfigWithDefaults = {
         ...mergedConfig,
         log: mergedConfig.log || "info",
-        failOnError: mergedConfig.failOnError === undefined ? true : mergedConfig.failOnError,
+        failOnNotValid: mergedConfig.failOnNotValid === undefined
+            ? true
+            : mergedConfig.failOnNotValid,
         reporter: mergedConfig.reporter || "text",
     };
     core.debug(`Configuration: ${JSON.stringify(mergedConfigWithDefaults)}`);
-    const result = inputOptionsSchema.safeParse(mergedConfigWithDefaults);
+    const result = allConfigSchema.safeParse(mergedConfigWithDefaults);
     if (!result.success) {
         core.error("Error validating the configuration");
         throw new Error(fromError(result.error).toString());
@@ -65403,7 +65418,7 @@ async function run() {
         core.setOutput(OUTPUT_REPORT, report);
         core.setOutput(OUTPUT_VALID, result.valid);
         if (!result.valid) {
-            if (options.failOnError) {
+            if (options.failOnNotValid) {
                 core.setFailed(FAILED_MESSAGE);
             }
         }

@@ -52,6 +52,6 @@ ignore:
   - "dist/**"
   - "coverage/**"
   - ".github/ISSUE_TEMPLATE/**"
-failOnError: false
+failOnNotValid: true
 reporter: "text"
 log: "debug"
