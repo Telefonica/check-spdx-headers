@@ -89,6 +89,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: ./.github/actions/setup-node
+        id: setup-node
+        with:
+          npm-token: ${{ secrets.NPM_TOKEN_XCUT }}
+
       - name: Check License Compliance
         if: github.event_name != 'pull_request'
         uses: Telefonica/check-license-compliance@v0.1.0
