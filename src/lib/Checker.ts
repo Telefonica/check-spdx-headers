@@ -76,6 +76,12 @@ export class Checker {
     this._logger.silly(`Checking file license`, { file, license });
     const stats = await stat(file);
 
+    const approvedLicenses = Array.isArray(license) ? license : [license];
+
+    if (!approvedLicenses.length) {
+      return null;
+    }
+
     if (stats.isFile()) {
       const fileContent = await readFile(file, "utf-8");
 
@@ -89,8 +95,6 @@ export class Checker {
         this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
         return message;
       }
-
-      const approvedLicenses = Array.isArray(license) ? license : [license];
 
       try {
         if (!satisfies(spdxLicense, approvedLicenses)) {
@@ -120,6 +124,14 @@ export class Checker {
   ): Promise<string | null> {
     this._logger.silly(`Checking file copyright`, { file, copyright });
 
+    const approvedCopyrights = Array.isArray(copyright)
+      ? copyright
+      : [copyright];
+
+    if (!approvedCopyrights.length) {
+      return null;
+    }
+
     const fileContent = await readFile(file, "utf-8");
 
     const spdxCopyright = this._getSPDXHeader(fileContent, "FileCopyrightText");
@@ -128,14 +140,6 @@ export class Checker {
       const message = `Does not have a copyright`;
       this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
       return message;
-    }
-
-    const approvedCopyrights = Array.isArray(copyright)
-      ? copyright
-      : [copyright];
-
-    if (!approvedCopyrights.length) {
-      return null;
     }
 
     const matches = approvedCopyrights.some((approvedCopyright) => {
@@ -236,18 +240,7 @@ export class Checker {
     const flatResult = {
       rule: ruleName,
       valid: result.every((r) => r.valid),
-      // Combine the errors of the same file
-      result: result.reduce((acc, r) => {
-        const existingFile = acc.find((f) => f.file === r.file);
-
-        if (existingFile) {
-          existingFile.errors.push(...r.errors);
-        } else {
-          acc.push(r);
-        }
-
-        return acc;
-      }, [] as FileRuleResult[]),
+      result,
     };
 
     this._logger.debug(
@@ -405,6 +398,31 @@ export class Checker {
   }
 
   /**
+   * Removed repeated rule names from the results by rule
+   * @param rulesResults The results of the rules
+   * @returns The results without the rule names
+   */
+  private _removeRuleNamesFromRulesResult(
+    rulesResults: RuleResult[],
+  ): RuleResult[] {
+    return rulesResults.map((ruleResult) => {
+      const result = ruleResult.result.map((file) => {
+        return {
+          file: file.file,
+          valid: file.valid,
+          errors: file.errors,
+        };
+      });
+
+      return {
+        rule: ruleResult.rule,
+        valid: ruleResult.valid,
+        result,
+      };
+    });
+  }
+
+  /**
    * Checks all rules
    * @returns An object with the result of the check
    */
@@ -424,7 +442,7 @@ export class Checker {
 
     const flatResult: Result = {
       valid: result.every((r) => r.valid),
-      rules: result,
+      rules: this._removeRuleNamesFromRulesResult(result),
       files: combinedResult,
       errors: this._combineErrors(combinedResult),
       checkedFiles: combinedResult.length,

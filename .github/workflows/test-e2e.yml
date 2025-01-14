@@ -22,6 +22,7 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      # NOTE: This checks the SPDX headers of the files in the repository with the real configuration
       - name: Check SPDX headers
         id: check-spdx-headers
         uses: ./
