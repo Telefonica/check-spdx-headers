@@ -28,6 +28,7 @@ jobs:
         id: check-spdx-headers
         uses: ./
 
+       # NOTE: Next steps check that the library produces the expected errors when the SPDX headers are not valid
       - name: Test SPDX headers - Case 1
         id: test-spdx-headers-01
         uses: ./
