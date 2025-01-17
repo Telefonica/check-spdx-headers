@@ -93,16 +93,16 @@ jobs:
           fail-on-not-valid: false
 
       - name: Test - Case 2 - Assert 1 failed
-        if: fromJson(steps.test-spdx-headers-01.outputs.report).valid == true
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).valid == true
         run: |
           echo "Test case 2 failed. The check did not found errors" && exit 1
 
       - name: Test - Case 2 - Assert 2 failed
-        if: fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles != 15
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).invalidFiles != 15
         run: |
           echo "Test case 2 failed. The check should have found 15 invalid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles }}" && exit 1
       
       - name: Test - Case 2 - Assert 3 failed
-        if: fromJson(steps.test-spdx-headers-01.outputs.report).validFiles != 0
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).validFiles != 0
         run: |
           echo "Test case 2 failed. The check should have found 0 valid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).validFiles }}" && exit 1
