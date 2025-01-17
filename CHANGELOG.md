@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Deprecated
 #### Removed
 
-## [0.3.0] - 2025-01-15
+## [1.0.0] - 2025-01-17
 
 ### Added
 
@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * feat: Do not repeat rule name on each rule result when they are grouped by rule name
 * feat: Ignore license headers rule when it is an empty array
+* docs: Change github inputs examples to JSON format to avoid indentation issues
 
 ### Fixed
 
