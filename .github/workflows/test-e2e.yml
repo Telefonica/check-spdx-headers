@@ -22,9 +22,86 @@ jobs:
         id: checkout
         uses: actions/checkout@v4
 
+      # NOTE: This checks the SPDX headers of the files in the repository with the real configuration
       - name: Check SPDX headers
         id: check-spdx-headers
         uses: ./
 
-      # TODO: Add E2E tests, checking the output of different configurations
-      # We could use a github-script action to parse the json report and check the results of each different configuration
+       # NOTE: Next steps check that the library produces the expected errors when the SPDX headers are not valid
+      - name: Test - Case 1
+        id: test-spdx-headers-01
+        uses: ./
+        with:
+          rules: |
+            [
+              {
+                "name":"Source code",
+                "headers":
+                  [
+                    {
+                      "files":["**/*.ts"],
+                      "license": "MIT"
+                    }
+                  ]
+              }
+            ]
+          ignore: |
+            - "**/node_modules/**"
+            - "**/dist/**"
+          log: "debug"
+          reporter: "json"
+          fail-on-not-valid: false
+
+      - name: Test - Case 1 - Assert 1 failed
+        if: fromJson(steps.test-spdx-headers-01.outputs.report).valid == true
+        run: |
+          echo "Test case 1 failed. The check did not found errors" && exit 1
+
+      - name: Test - Case 1 - Assert 2 failed
+        if: fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles != 15
+        run: |
+          echo "Test case 1 failed. The check should have found 15 invalid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles }}" && exit 1
+      
+      - name: Test - Case 1 - Assert 3 failed
+        if: fromJson(steps.test-spdx-headers-01.outputs.report).validFiles != 0
+        run: |
+          echo "Test case 1 failed. The check should have found 0 valid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).validFiles }}" && exit 1
+
+      - name: Test - Case 2
+        id: test-spdx-headers-02
+        uses: ./
+        with:
+          rules: |
+            [
+              {
+                "name":"Source code",
+                "headers":
+                  [
+                    {
+                      "files":["**/*.ts"],
+                      "copyright": "Foo"
+                    }
+                  ]
+              }
+            ]
+          ignore: |
+            - "**/node_modules/**"
+            - "**/dist/**"
+          log: "debug"
+          reporter: "json"
+          fail-on-not-valid: false
+
+      - name: Test - Case 2 - Assert 1 failed
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).valid == true
+        run: |
+          echo "Test case 2 failed. The check did not found errors" && exit 1
+
+      - name: Test - Case 2 - Assert 2 failed
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).invalidFiles != 15
+        run: |
+          echo "Test case 2 failed. The check should have found 15 invalid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles }}" && exit 1
+      
+      - name: Test - Case 2 - Assert 3 failed
+        if: fromJson(steps.test-spdx-headers-02.outputs.report).validFiles != 0
+        run: |
+          echo "Test case 2 failed. The check should have found 0 valid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).validFiles }}" && exit 1
