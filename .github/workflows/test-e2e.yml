@@ -40,8 +40,8 @@ jobs:
           #          - "**/*.ts"
           #        license: "MIT"
           ignore: |
-            - "**/node_modules/**"
-            - "**/dist/**"
+            - "**/foo/**"
+            - "**/foo/**"
           log: "debug"
           reporter: "json"
           fail-on-not-valid: false
