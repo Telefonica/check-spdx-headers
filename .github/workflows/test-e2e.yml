@@ -29,11 +29,23 @@ jobs:
         uses: ./
 
        # NOTE: Next steps check that the library produces the expected errors when the SPDX headers are not valid
-      - name: Test SPDX headers - Case 1
+      - name: Test - Case 1
         id: test-spdx-headers-01
         uses: ./
         with:
-          rules: '[{"name":"Source code","headers":[{"files":["**/*.ts"], "license": "MIT"}]}]'
+          rules: |
+            [
+              {
+                "name":"Source code",
+                "headers":
+                  [
+                    {
+                      "files":["**/*.ts"],
+                      "license": "MIT"
+                    }
+                  ]
+              }
+            ]
           ignore: |
             - "**/node_modules/**"
             - "**/dist/**"
@@ -41,12 +53,12 @@ jobs:
           reporter: "json"
           fail-on-not-valid: false
 
-      - name: Check SPDX headers - Case 1 - Check 1
+      - name: Test - Case 1 - Assert 1 failed
         if: fromJson(steps.test-spdx-headers-01.outputs.report).valid == true
         run: |
           echo "Test case 1 failed. The check did not found errors" && exit 1
 
-      - name: Check SPDX headers - Case 1 - Check 2
+      - name: Test - Case 1 - Assert 2 failed
         if: fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles != 15
         run: |
           echo "Test case 1 failed. The check should have found 15 invalid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles }}" && exit 1
