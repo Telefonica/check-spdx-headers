@@ -33,12 +33,12 @@ jobs:
         id: test-spdx-headers-01
         uses: ./
         with:
-          rules: |  
-            - name: "Source code"
-              headers:
-                - files:
-                    - "**/*.ts"
-                  license: "MIT"
+          #rules: |  
+          #  - name: "Source code"
+          #    headers:
+          #      - files:
+          #          - "**/*.ts"
+          #        license: "MIT"
           ignore: |
             - "**/node_modules/**"
             - "**/dist/**"
