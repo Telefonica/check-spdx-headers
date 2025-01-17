@@ -34,12 +34,14 @@ jobs:
         uses: ./
         with:
           rules: |
+            
             - name: "Source code"
               headers:
                 - files:
                     - "**/*.ts"
                   license: "MIT"
           ignore: |
+            
             - "**/node_modules/**"
             - "**/dist/**"
           log: "debug"
