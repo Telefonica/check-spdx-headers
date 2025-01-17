@@ -141,41 +141,59 @@ The action also allows to set the configuration by using inputs. When defined, t
 * `reporter`: Reporter to use. Possible values are `text`, `markdown` and `json`. Default is `text`.
 * `log`: Log level to use. Possible values are `silly`, `debug`, `info`, `warning` and `error`. Default is `info`.
 * `fail-on-not-valid`: Boolean value to determine if the action should fail when a file does not have the correct headers. Default is `true`.
-* `ignore`: Multiline string with file glob pattern or list of file glob patterns to ignore in all headers checks expressed as a YAML list.    
+* `ignore`: Multiline string with file glob pattern or list of file glob patterns to ignore in all headers checks expressed as a JSON array.  
     Example:
 
     ```yaml
     ignore: |
-      - "**/node_modules/**"
-      - "**/dist/**"
+      [
+        "**/node_modules/**",
+        "**/dist/**"
+      ]
     ```
-* `rules`: Multiline string with rules to enforce expressed as a YAML list. Read the [Configuration File](#configuration-file) section for more info.
+* `rules`: Multiline string with rules to enforce expressed as a JSON. Read the [Configuration File](#configuration-file) section for more info. NOTE: Using YAML is not recommended in Github action inputs because it might cause problems with the YAML parser due to indentation issues. So, it is better to use JSON, which is also a valid YAML.
     Example:
 
     ```yaml
     rules: |
-      - name: "Source code"
-        headers:
-          - files:
-              - "**/*.js"
-            license: "Apache-2.0"
+      [
+        "name": "Source code",
+        "headers": [
+          {
+            "files": [
+              "**/*.js"
+            ],
+            "license": "Apache-2.0"
+          }
+        ]
+      ]
     ```
-* `config`: Multiline string with the whole configuration expressed as a YAML object as in the configuration file. It will extend the values defined in the [configuration file](#configuration-file). Any config value that is defined in other inputs will override the values here.
+* `config`: Multiline string with the whole configuration expressed as a JSON object as in the configuration file. It will extend the values defined in the [configuration file](#configuration-file). Any config value that is defined in other inputs will override the values here.
     Example:
 
     ```yaml
     config: |
-      rules:
-        - name: "Source code"
-          headers:
-            - files:
-                - "**/*.js"
-              license: "Apache-2.0"
-      ignore:
-        - "**/node_modules/**"
-        - "**/dist/**"
-      reporter: "markdown"
-      log: "debug"
+      {
+        "rules": [
+          {
+            "name": "Source code",
+            "headers": [
+              {
+                "files": [
+                  "**/*.js"
+                ],
+                "license": "Apache-2.0"
+              }
+            ]
+          }
+        ],
+        "reporter": "markdown",
+        "ignore": [
+          "**/node_modules/**",
+          "**/dist/**"
+        ],
+        "log": "debug"
+      }
     ```
 
 > [!WARNING]
@@ -233,18 +251,28 @@ jobs:
           fail-on-not-valid: true
           # Properties overriding the values in the configuration file and in the "config" input
           ignore: |
-            - "**/dist/**"
-            - "**/node_modules/**"
+            ["**/dist/**", "**/node_modules/**"]
           rules: |
-            - name: "Source code"
-              headers:
-                - files:
-                    - "**/*.js"
-                  license: "Apache-2.0"
+            [
+              {
+                "name": "Source code",
+                "headers": [
+                  {
+                    "files": [
+                      "**/*.js"
+                    ],
+                    "license": "Apache-2.0"
+                  }
+                ]
+              }
+            ]
           # This will extend the values in the configuration file
           config: |
-            ignore:
-              - "**/node_modules/**"
+            {
+              "ignore": [
+                "**/node_modules/**"
+              ]
+            }
 ```
 
 ## License check

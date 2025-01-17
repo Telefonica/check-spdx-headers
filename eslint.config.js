@@ -138,6 +138,7 @@ export default [
     },
     rules: {
       ...pluginJest.configs["flat/all"].rules,
+      "jest/no-conditional-in-test": [0],
       "jest/no-disabled-tests": "error",
       "jest/no-focused-tests": "error",
       "jest/no-identical-title": "error",
