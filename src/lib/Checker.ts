@@ -123,6 +123,7 @@ export class Checker {
     copyright: string | string[],
   ): Promise<string | null> {
     this._logger.silly(`Checking file copyright`, { file, copyright });
+    const stats = await stat(file);
 
     const approvedCopyrights = Array.isArray(copyright)
       ? copyright
@@ -131,29 +132,33 @@ export class Checker {
     if (!approvedCopyrights.length) {
       return null;
     }
+    if (stats.isFile()) {
+      const fileContent = await readFile(file, "utf-8");
 
-    const fileContent = await readFile(file, "utf-8");
+      const spdxCopyright = this._getSPDXHeader(
+        fileContent,
+        "FileCopyrightText",
+      );
 
-    const spdxCopyright = this._getSPDXHeader(fileContent, "FileCopyrightText");
-
-    if (!spdxCopyright) {
-      const message = `Does not have a copyright`;
-      this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
-      return message;
-    }
-
-    const matches = approvedCopyrights.some((approvedCopyright) => {
-      const matcher = new RegExp(`^${approvedCopyright}$`);
-      if (!matcher.test(spdxCopyright)) {
-        return false;
+      if (!spdxCopyright) {
+        const message = `Does not have a copyright`;
+        this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
+        return message;
       }
-      return true;
-    });
 
-    if (!matches) {
-      const message = `Does not have the expected copyright`;
-      this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
-      return message;
+      const matches = approvedCopyrights.some((approvedCopyright) => {
+        const matcher = new RegExp(`^${approvedCopyright}$`);
+        if (!matcher.test(spdxCopyright)) {
+          return false;
+        }
+        return true;
+      });
+
+      if (!matches) {
+        const message = `Does not have the expected copyright`;
+        this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
+        return message;
+      }
     }
 
     return null;
