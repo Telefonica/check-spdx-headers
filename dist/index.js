@@ -64891,6 +64891,10 @@ class Checker {
     async _checkFileLicense(file, license) {
         this._logger.silly(`Checking file license`, { file, license });
         const stats = await (0,promises_namespaceObject.stat)(file);
+        const approvedLicenses = Array.isArray(license) ? license : [license];
+        if (!approvedLicenses.length) {
+            return null;
+        }
         if (stats.isFile()) {
             const fileContent = await (0,promises_namespaceObject.readFile)(file, "utf-8");
             const spdxLicense = this._getSPDXHeader(fileContent, "License-Identifier");
@@ -64899,7 +64903,6 @@ class Checker {
                 this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
                 return message;
             }
-            const approvedLicenses = Array.isArray(license) ? license : [license];
             try {
                 if (!spdx_satisfies(spdxLicense, approvedLicenses)) {
                     const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
@@ -64923,18 +64926,18 @@ class Checker {
      */
     async _checkFileCopyright(file, copyright) {
         this._logger.silly(`Checking file copyright`, { file, copyright });
+        const approvedCopyrights = Array.isArray(copyright)
+            ? copyright
+            : [copyright];
+        if (!approvedCopyrights.length) {
+            return null;
+        }
         const fileContent = await (0,promises_namespaceObject.readFile)(file, "utf-8");
         const spdxCopyright = this._getSPDXHeader(fileContent, "FileCopyrightText");
         if (!spdxCopyright) {
             const message = `Does not have a copyright`;
             this.logger.debug(`File "${file}" ${message.toLowerCase()}`);
             return message;
-        }
-        const approvedCopyrights = Array.isArray(copyright)
-            ? copyright
-            : [copyright];
-        if (!approvedCopyrights.length) {
-            return null;
         }
         const matches = approvedCopyrights.some((approvedCopyright) => {
             const matcher = new RegExp(`^${approvedCopyright}$`);
@@ -65012,17 +65015,7 @@ class Checker {
         const flatResult = {
             rule: ruleName,
             valid: result.every((r) => r.valid),
-            // Combine the errors of the same file
-            result: result.reduce((acc, r) => {
-                const existingFile = acc.find((f) => f.file === r.file);
-                if (existingFile) {
-                    existingFile.errors.push(...r.errors);
-                }
-                else {
-                    acc.push(r);
-                }
-                return acc;
-            }, []),
+            result,
         };
         this._logger.debug(`Result of ${headersName} in rule "${ruleName}"`, flatResult);
         return flatResult;
@@ -65148,6 +65141,27 @@ class Checker {
         return flatResult;
     }
     /**
+     * Removed repeated rule names from the results by rule
+     * @param rulesResults The results of the rules
+     * @returns The results without the rule names
+     */
+    _removeRuleNamesFromRulesResult(rulesResults) {
+        return rulesResults.map((ruleResult) => {
+            const result = ruleResult.result.map((file) => {
+                return {
+                    file: file.file,
+                    valid: file.valid,
+                    errors: file.errors,
+                };
+            });
+            return {
+                rule: ruleResult.rule,
+                valid: ruleResult.valid,
+                result,
+            };
+        });
+    }
+    /**
      * Checks all rules
      * @returns An object with the result of the check
      */
@@ -65162,7 +65176,7 @@ class Checker {
         const combinedResult = this._combineFileRulesResults(result);
         const flatResult = {
             valid: result.every((r) => r.valid),
-            rules: result,
+            rules: this._removeRuleNamesFromRulesResult(result),
             files: combinedResult,
             errors: this._combineErrors(combinedResult),
             checkedFiles: combinedResult.length,
