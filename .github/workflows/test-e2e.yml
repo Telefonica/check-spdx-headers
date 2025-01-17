@@ -41,9 +41,12 @@ jobs:
           reporter: "json"
           fail-on-not-valid: false
 
-      - name: Check SPDX headers - Case 1
-        env:
-          report: ${{ fromJson(steps.test-spdx-headers-01.outputs.report) }}
-        if: env.report.valid == true || env.report.invalidFiles != 5
+      - name: Check SPDX headers - Case 1 - Check 1
+        if: fromJson(steps.test-spdx-headers-01.outputs.report).valid == true
         run: |
-          echo "Test case 1 failed: ${{ toJson(env.report) }}" && exit 1
+          echo "Test case 1 failed. The check did not found errors" && exit 1
+
+      - name: Check SPDX headers - Case 1 - Check 2
+        if: fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles != 15
+        run: |
+          echo "Test case 1 failed. The check should have found 15 invalid files, but it found ${{ fromJson(steps.test-spdx-headers-01.outputs.report).invalidFiles }}" && exit 1
