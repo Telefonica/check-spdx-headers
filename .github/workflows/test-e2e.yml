@@ -33,18 +33,18 @@ jobs:
         id: test-spdx-headers-01
         uses: ./
         with:
-          rules: >  
+          rules: |  
             - name: "Source code"
               headers:
                 - files:
                     - "**/*.ts"
                   license: "MIT"
-          ignore: >
+          ignore: |
             - "**/node_modules/**"
             - "**/dist/**"
           log: "debug"
           reporter: "json"
-          failOnNotValid: false
+          fail-on-not-valid: false
 
       - name: Check SPDX headers - Case 1
         env:
