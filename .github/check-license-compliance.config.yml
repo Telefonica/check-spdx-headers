@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2025 Telefónica Innovación Digital and contributors
+# SPDX-License-Identifier: MIT
+
+licenses:
+  allowed:
+    - Apache-2.0
+    - MIT
+    - BSD
+    - ISC
+    - (MIT AND CC-BY-3.0)
+  warning:
+    - LGPL-3.0
+    - LGPL-2.0
+    - MPL-2.0
+    - EPL-1.0
+    - CC-BY-4.0
+    - Python-2.0
+    - BlueOak-1.0.0
+    - CC BY-SA 4.0
+    - CC-BY-3.0
+    - CC0-1.0
