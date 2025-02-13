@@ -1,19 +1,19 @@
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 // SPDX-License-Identifier: MIT
 
+import js from "@eslint/js";
 import json from "@eslint/json";
 import markdown from "@eslint/markdown";
-import prettier from "eslint-plugin-prettier";
-import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
-import eslintConfigPrettier from "eslint-config-prettier";
-import js from "@eslint/js";
-import globals from "globals";
-// eslint-disable-next-line import/no-unresolved
-import typescriptParser from "@typescript-eslint/parser";
 // eslint-disable-next-line import/no-unresolved
 import typescriptEslintPlugin from "@typescript-eslint/eslint-plugin";
-import pluginJest from "eslint-plugin-jest";
+// eslint-disable-next-line import/no-unresolved
+import typescriptParser from "@typescript-eslint/parser";
+import eslintConfigPrettier from "eslint-config-prettier";
 import importPlugin from "eslint-plugin-import";
+import pluginJest from "eslint-plugin-jest";
+import prettier from "eslint-plugin-prettier";
+import eslintPluginPrettierRecommended from "eslint-plugin-prettier/recommended";
+import globals from "globals";
 
 export default [
   {
@@ -83,6 +83,17 @@ export default [
       "no-unused-vars": [
         2,
         { vars: "all", args: "after-used", ignoreRestSiblings: false },
+      ],
+      "import/order": [
+        "error",
+        {
+          groups: ["builtin", "external", "parent", "sibling", "index"],
+          "newlines-between": "always",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
       ],
     },
   },

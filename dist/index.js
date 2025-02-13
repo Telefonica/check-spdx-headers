@@ -14188,6 +14188,155 @@ module.exports = function (source) {
 
 /***/ }),
 
+/***/ 5131:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var compare = __nccwpck_require__(7369)
+var parse = __nccwpck_require__(3326)
+var ranges = __nccwpck_require__(9344)
+
+function rangesAreCompatible (first, second) {
+  return (
+    first.license === second.license ||
+    ranges.some(function (range) {
+      return (
+        licenseInRange(first.license, range) &&
+        licenseInRange(second.license, range)
+      )
+    })
+  )
+}
+
+function licenseInRange (license, range) {
+  return (
+    range.indexOf(license) !== -1 ||
+    range.some(function (element) {
+      return (
+        Array.isArray(element) &&
+        element.indexOf(license) !== -1
+      )
+    })
+  )
+}
+
+function identifierInRange (identifier, range) {
+  return (
+    identifier.license === range.license ||
+    compare.gt(identifier.license, range.license) ||
+    compare.eq(identifier.license, range.license)
+  )
+}
+
+function licensesAreCompatible (first, second) {
+  if (first.exception !== second.exception) {
+    return false
+  } else if (second.hasOwnProperty('license')) {
+    if (second.hasOwnProperty('plus')) {
+      if (first.hasOwnProperty('plus')) {
+        // first+, second+
+        return rangesAreCompatible(first, second)
+      } else {
+        // first, second+
+        return identifierInRange(first, second)
+      }
+    } else {
+      if (first.hasOwnProperty('plus')) {
+        // first+, second
+        return identifierInRange(second, first)
+      } else {
+        // first, second
+        return first.license === second.license
+      }
+    }
+  }
+}
+
+function replaceGPLOnlyOrLaterWithRanges (argument) {
+  var license = argument.license
+  if (license) {
+    if (endsWith(license, '-or-later')) {
+      argument.license = license.replace('-or-later', '')
+      argument.plus = true
+    } else if (endsWith(license, '-only')) {
+      argument.license = license.replace('-only', '')
+      delete argument.plus
+    }
+  } else if (argument.left && argument.right) {
+    argument.left = replaceGPLOnlyOrLaterWithRanges(argument.left)
+    argument.right = replaceGPLOnlyOrLaterWithRanges(argument.right)
+  }
+  return argument
+}
+
+function endsWith (string, substring) {
+  return string.indexOf(substring) === string.length - substring.length
+}
+
+function licenseString (e) {
+  if (e.hasOwnProperty('noassertion')) return 'NOASSERTION'
+  if (e.license) {
+    return (
+      e.license +
+      (e.plus ? '+' : '') +
+      (e.exception ? ('WITH ' + e.exception) : '')
+    )
+  }
+}
+
+// Expand the given expression into an equivalent array where each member is an array of licenses AND'd
+// together and the members are OR'd together. For example, `(MIT OR ISC) AND GPL-3.0` expands to
+// `[[GPL-3.0 AND MIT], [ISC AND MIT]]`. Note that within each array of licenses, the entries are
+// normalized (sorted) by license name.
+function expand (expression) {
+  return sort(expandInner(expression))
+}
+
+function expandInner (expression) {
+  if (!expression.conjunction) return [{ [licenseString(expression)]: expression }]
+  if (expression.conjunction === 'or') return expandInner(expression.left).concat(expandInner(expression.right))
+  if (expression.conjunction === 'and') {
+    var left = expandInner(expression.left)
+    var right = expandInner(expression.right)
+    return left.reduce(function (result, l) {
+      right.forEach(function (r) { result.push(Object.assign({}, l, r)) })
+      return result
+    }, [])
+  }
+}
+
+function sort (licenseList) {
+  var sortedLicenseLists = licenseList
+    .filter(function (e) { return Object.keys(e).length })
+    .map(function (e) { return Object.keys(e).sort() })
+  return sortedLicenseLists.map(function (list, i) {
+    return list.map(function (license) { return licenseList[i][license] })
+  })
+}
+
+function isANDCompatible (parsedExpression, parsedLicenses) {
+  return parsedExpression.every(function (element) {
+    return parsedLicenses.some(function (approvedLicense) {
+      return licensesAreCompatible(element, approvedLicense)
+    })
+  })
+}
+
+function satisfies (spdxExpression, arrayOfLicenses) {
+  var parsedExpression = expand(replaceGPLOnlyOrLaterWithRanges(parse(spdxExpression)))
+  var parsedLicenses = arrayOfLicenses.map(function (l) { return replaceGPLOnlyOrLaterWithRanges(parse(l)) })
+  for (const parsed of parsedLicenses) {
+    if (parsed.hasOwnProperty('conjunction')) {
+      throw new Error('Approved licenses cannot be AND or OR expressions.')
+    }
+  }
+  return parsedExpression.some(function (o) { return isANDCompatible(o, parsedLicenses) })
+}
+
+module.exports = satisfies
+
+
+/***/ }),
+
 /***/ 9428:
 /***/ ((__unused_webpack_module, exports) => {
 
@@ -15178,7 +15327,7 @@ exports.debug = debug; // for test
 
 
 const Client = __nccwpck_require__(6197)
-const Dispatcher = __nccwpck_require__(3849)
+const Dispatcher = __nccwpck_require__(992)
 const errors = __nccwpck_require__(8707)
 const Pool = __nccwpck_require__(5076)
 const BalancedPool = __nccwpck_require__(1093)
@@ -22957,7 +23106,7 @@ module.exports = {
 
 
 
-const Dispatcher = __nccwpck_require__(3849)
+const Dispatcher = __nccwpck_require__(992)
 const {
   ClientDestroyedError,
   ClientClosedError,
@@ -23151,7 +23300,7 @@ module.exports = DispatcherBase
 
 /***/ }),
 
-/***/ 3849:
+/***/ 992:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 
@@ -33526,7 +33675,7 @@ const MockClient = __nccwpck_require__(7365)
 const MockPool = __nccwpck_require__(4004)
 const { matchValue, buildMockOptions } = __nccwpck_require__(3397)
 const { InvalidArgumentError, UndiciError } = __nccwpck_require__(8707)
-const Dispatcher = __nccwpck_require__(3849)
+const Dispatcher = __nccwpck_require__(992)
 const Pluralizer = __nccwpck_require__(1529)
 const PendingInterceptorsFormatter = __nccwpck_require__(6142)
 
@@ -51444,12 +51593,12 @@ var __webpack_exports__ = {};
 
 // EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
 var core = __nccwpck_require__(7484);
-// EXTERNAL MODULE: ./node_modules/yaml/dist/index.js
-var dist = __nccwpck_require__(8815);
-;// CONCATENATED MODULE: external "fs/promises"
-const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
 // EXTERNAL MODULE: external "fs"
 var external_fs_ = __nccwpck_require__(9896);
+;// CONCATENATED MODULE: external "fs/promises"
+const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
+// EXTERNAL MODULE: ./node_modules/yaml/dist/index.js
+var dist = __nccwpck_require__(8815);
 ;// CONCATENATED MODULE: ./node_modules/zod/lib/index.mjs
 var util;
 (function (util) {
@@ -55834,68 +55983,6 @@ var z = /*#__PURE__*/Object.freeze({
 
 
 
-;// CONCATENATED MODULE: ./src/lib/Logger.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
-
-const logLevelSchema = z.enum([
-    "silly",
-    "debug",
-    "verbose",
-    "info",
-    "warning",
-    "error",
-]);
-
-;// CONCATENATED MODULE: ./src/lib/Config.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
-
-
-const globPatternSchema = z.string();
-const licenseSchema = z.string();
-const ignoreSchema = z.union([z.string(), z.array(z.string())]);
-const ruleHeadersSchema = z
-    .object({
-    files: z.union([globPatternSchema, z.array(globPatternSchema)]),
-    license: z.union([licenseSchema, z.array(licenseSchema)]).optional(),
-    ignore: ignoreSchema.optional(),
-    copyright: z.union([z.string(), z.array(z.string())]).optional(),
-})
-    .strict();
-const ruleSchema = z.object({
-    name: z.string(),
-    headers: z.array(ruleHeadersSchema),
-    ignore: ignoreSchema.optional(),
-});
-const configSchema = z
-    .object({
-    rules: z.array(ruleSchema),
-    log: logLevelSchema.optional(),
-    ignore: ignoreSchema.optional(),
-})
-    .strict();
-
-;// CONCATENATED MODULE: ./src/Config.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
-// SPDX-License-Identifier: Apache-2.0
-
-
-
-const reporterSchema = z.enum(["json", "markdown", "text"]).optional();
-const failOnNotValidSchema = z.boolean().optional();
-const inputOptionsSchema = z
-    .object({
-    log: logLevelSchema.optional(),
-    reporter: reporterSchema,
-    failOnNotValid: failOnNotValidSchema,
-})
-    .strict();
-const allConfigSchema = z.object({
-    ...configSchema.shape,
-    ...inputOptionsSchema.shape,
-});
-
 ;// CONCATENATED MODULE: ./node_modules/zod-validation-error/dist/index.mjs
 // lib/isZodErrorLike.ts
 function isZodErrorLike(err) {
@@ -56137,6 +56224,68 @@ function fromError(err, options = {}) {
 }
 
 //# sourceMappingURL=index.mjs.map
+;// CONCATENATED MODULE: ./src/lib/Logger.types.ts
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
+const logLevelSchema = z.enum([
+    "silly",
+    "debug",
+    "verbose",
+    "info",
+    "warning",
+    "error",
+]);
+
+;// CONCATENATED MODULE: ./src/lib/Config.types.ts
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
+
+const globPatternSchema = z.string();
+const licenseSchema = z.string();
+const ignoreSchema = z.union([z.string(), z.array(z.string())]);
+const ruleHeadersSchema = z
+    .object({
+    files: z.union([globPatternSchema, z.array(globPatternSchema)]),
+    license: z.union([licenseSchema, z.array(licenseSchema)]).optional(),
+    ignore: ignoreSchema.optional(),
+    copyright: z.union([z.string(), z.array(z.string())]).optional(),
+})
+    .strict();
+const ruleSchema = z.object({
+    name: z.string(),
+    headers: z.array(ruleHeadersSchema),
+    ignore: ignoreSchema.optional(),
+});
+const configSchema = z
+    .object({
+    rules: z.array(ruleSchema),
+    log: logLevelSchema.optional(),
+    ignore: ignoreSchema.optional(),
+})
+    .strict();
+
+;// CONCATENATED MODULE: ./src/Config.types.ts
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-License-Identifier: Apache-2.0
+
+
+
+const reporterSchema = z.enum(["json", "markdown", "text"]).optional();
+const failOnNotValidSchema = z.boolean().optional();
+const inputOptionsSchema = z
+    .object({
+    log: logLevelSchema.optional(),
+    reporter: reporterSchema,
+    failOnNotValid: failOnNotValidSchema,
+})
+    .strict();
+const allConfigSchema = z.object({
+    ...configSchema.shape,
+    ...inputOptionsSchema.shape,
+});
+
 ;// CONCATENATED MODULE: ./src/Config.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 // SPDX-License-Identifier: Apache-2.0
@@ -63967,9 +64116,9 @@ const glob = Object.assign(glob_, {
 });
 glob.glob = glob;
 //# sourceMappingURL=index.js.map
-// EXTERNAL MODULE: ./node_modules/winston/lib/winston.js
-var winston = __nccwpck_require__(4240);
-var winston_default = /*#__PURE__*/__nccwpck_require__.n(winston);
+// EXTERNAL MODULE: ./node_modules/spdx-satisfies/index.js
+var spdx_satisfies = __nccwpck_require__(5131);
+var spdx_satisfies_default = /*#__PURE__*/__nccwpck_require__.n(spdx_satisfies);
 ;// CONCATENATED MODULE: ./node_modules/chalk/source/vendor/ansi-styles/index.js
 const ANSI_BACKGROUND_OFFSET = 10;
 
@@ -64630,6 +64779,9 @@ const chalkStderr = createChalk({level: stderrColor ? stderrColor.level : 0});
 
 /* harmony default export */ const source = (chalk);
 
+// EXTERNAL MODULE: ./node_modules/winston/lib/winston.js
+var winston = __nccwpck_require__(4240);
+var winston_default = /*#__PURE__*/__nccwpck_require__.n(winston);
 ;// CONCATENATED MODULE: ./src/lib/Logger.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 // SPDX-License-Identifier: Apache-2.0
@@ -64667,187 +64819,12 @@ function createLogger(level) {
     return logger;
 }
 
-// EXTERNAL MODULE: ./node_modules/spdx-compare/index.js
-var spdx_compare = __nccwpck_require__(7369);
-// EXTERNAL MODULE: ./node_modules/spdx-expression-parse/index.js
-var spdx_expression_parse = __nccwpck_require__(3326);
-// EXTERNAL MODULE: ./node_modules/spdx-ranges/index.json
-var spdx_ranges = __nccwpck_require__(9344);
-;// CONCATENATED MODULE: ./src/lib/spdx-satisfies/index.js
-// SPDX-License-Identifier: MIT
-
-/*
- * NOTE: This file is an unpublished version of the spdx-satisfies package.
- * It seems that the contents in the main branch have not been published to npm.
- * Latest published version does not support passing an array of valid licenses, that's why this file was created.
- * The original package is available at https://www.npmjs.com/package/spdx-satisfies
- */
-
-
-
-
-
-function rangesAreCompatible(first, second) {
-  return (
-    first.license === second.license ||
-    spdx_ranges.some(function (range) {
-      return (
-        licenseInRange(first.license, range) &&
-        licenseInRange(second.license, range)
-      );
-    })
-  );
-}
-
-function licenseInRange(license, range) {
-  return (
-    range.indexOf(license) !== -1 ||
-    range.some(function (element) {
-      return Array.isArray(element) && element.indexOf(license) !== -1;
-    })
-  );
-}
-
-function identifierInRange(identifier, range) {
-  return (
-    identifier.license === range.license ||
-    spdx_compare.gt(identifier.license, range.license) ||
-    spdx_compare.eq(identifier.license, range.license)
-  );
-}
-
-function licensesAreCompatible(first, second) {
-  if (first.exception !== second.exception) {
-    return false;
-  } else if (Object.prototype.hasOwnProperty.call(second, "license")) {
-    if (Object.prototype.hasOwnProperty.call(second, "plus")) {
-      if (Object.prototype.hasOwnProperty.call(first, "plus")) {
-        // first+, second+
-        return rangesAreCompatible(first, second);
-      } else {
-        // first, second+
-        return identifierInRange(first, second);
-      }
-    } else {
-      if (Object.prototype.hasOwnProperty.call(first, "plus")) {
-        // first+, second
-        return identifierInRange(second, first);
-      } else {
-        // first, second
-        return first.license === second.license;
-      }
-    }
-  }
-}
-
-function replaceGPLOnlyOrLaterWithRanges(argument) {
-  var license = argument.license;
-  if (license) {
-    if (endsWith(license, "-or-later")) {
-      argument.license = license.replace("-or-later", "");
-      argument.plus = true;
-    } else if (endsWith(license, "-only")) {
-      argument.license = license.replace("-only", "");
-      delete argument.plus;
-    }
-  } else if (argument.left && argument.right) {
-    argument.left = replaceGPLOnlyOrLaterWithRanges(argument.left);
-    argument.right = replaceGPLOnlyOrLaterWithRanges(argument.right);
-  }
-  return argument;
-}
-
-function endsWith(string, substring) {
-  return string.indexOf(substring) === string.length - substring.length;
-}
-
-function licenseString(e) {
-  if (Object.prototype.hasOwnProperty.call(e, "noassertion"))
-    return "NOASSERTION";
-  if (e.license) {
-    return (
-      e.license +
-      (e.plus ? "+" : "") +
-      (e.exception ? "WITH " + e.exception : "")
-    );
-  }
-}
-
-// Expand the given expression into an equivalent array where each member is an array of licenses AND'd
-// together and the members are OR'd together. For example, `(MIT OR ISC) AND GPL-3.0` expands to
-// `[[GPL-3.0 AND MIT], [ISC AND MIT]]`. Note that within each array of licenses, the entries are
-// normalized (sorted) by license name.
-function expand(expression) {
-  return sort(expandInner(expression));
-}
-
-function expandInner(expression) {
-  if (!expression.conjunction)
-    return [{ [licenseString(expression)]: expression }];
-  if (expression.conjunction === "or")
-    return expandInner(expression.left).concat(expandInner(expression.right));
-  if (expression.conjunction === "and") {
-    var left = expandInner(expression.left);
-    var right = expandInner(expression.right);
-    return left.reduce(function (result, l) {
-      right.forEach(function (r) {
-        result.push(Object.assign({}, l, r));
-      });
-      return result;
-    }, []);
-  }
-}
-
-function sort(licenseList) {
-  var sortedLicenseLists = licenseList
-    .filter(function (e) {
-      return Object.keys(e).length;
-    })
-    .map(function (e) {
-      return Object.keys(e).sort();
-    });
-  return sortedLicenseLists.map(function (list, i) {
-    return list.map(function (license) {
-      return licenseList[i][license];
-    });
-  });
-}
-
-function isANDCompatible(parsedExpression, parsedLicenses) {
-  return parsedExpression.every(function (element) {
-    return parsedLicenses.some(function (approvedLicense) {
-      return licensesAreCompatible(element, approvedLicense);
-    });
-  });
-}
-
-function satisfies(spdxExpression, arrayOfLicenses) {
-  var parsedExpression = expand(
-    replaceGPLOnlyOrLaterWithRanges(spdx_expression_parse(spdxExpression)),
-  );
-  var parsedLicenses = arrayOfLicenses.map(function (l) {
-    return replaceGPLOnlyOrLaterWithRanges(spdx_expression_parse(l));
-  });
-  for (const parsed of parsedLicenses) {
-    if (Object.prototype.hasOwnProperty.call(parsed, "conjunction")) {
-      throw new Error("Approved licenses cannot be AND or OR expressions.");
-    }
-  }
-  return parsedExpression.some(function (o) {
-    return isANDCompatible(o, parsedLicenses);
-  });
-}
-
-/* harmony default export */ const spdx_satisfies = (satisfies);
-
 ;// CONCATENATED MODULE: ./src/lib/Checker.ts
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 // SPDX-License-Identifier: Apache-2.0
 
 
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 
 /**
  * Check files for license headers
@@ -64904,7 +64881,8 @@ class Checker {
                 return message;
             }
             try {
-                if (!spdx_satisfies(spdxLicense, approvedLicenses)) {
+                //@ts-expect-error Types library is not updated. From 6.0 version it supports passing an array of licenses
+                if (!spdx_satisfies_default()(spdxLicense, approvedLicenses)) {
                     const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
                     this.logger.debug(`${message} in file "${file}"`);
                     return message;
@@ -65198,23 +65176,6 @@ class Checker {
 
 
 
-// EXTERNAL MODULE: ./node_modules/min-indent/index.js
-var min_indent = __nccwpck_require__(1429);
-;// CONCATENATED MODULE: ./node_modules/strip-indent/index.js
-
-
-function stripIndent(string) {
-	const indent = min_indent(string);
-
-	if (indent === 0) {
-		return string;
-	}
-
-	const regex = new RegExp(`^[ \\t]{${indent}}`, 'gm');
-
-	return string.replace(regex, '');
-}
-
 ;// CONCATENATED MODULE: ./node_modules/indent-string/index.js
 function indentString(string, count = 1, options = {}) {
 	const {
@@ -65253,6 +65214,23 @@ function indentString(string, count = 1, options = {}) {
 	const regex = includeEmptyLines ? /^/gm : /^(?!\s*$)/gm;
 
 	return string.replace(regex, indent.repeat(count));
+}
+
+// EXTERNAL MODULE: ./node_modules/min-indent/index.js
+var min_indent = __nccwpck_require__(1429);
+;// CONCATENATED MODULE: ./node_modules/strip-indent/index.js
+
+
+function stripIndent(string) {
+	const indent = min_indent(string);
+
+	if (indent === 0) {
+		return string;
+	}
+
+	const regex = new RegExp(`^[ \\t]{${indent}}`, 'gm');
+
+	return string.replace(regex, '');
 }
 
 ;// CONCATENATED MODULE: ./src/Report.ts

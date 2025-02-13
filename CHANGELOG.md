@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * chore: Bump `check-license-compliance` action to v3.0.0-beta.1
+* chore: Bump `spdx-satisfies` to v6.0.0. Remove forked version of `spdx-satisfies` and use the official one
+* style: Fix imports order. Add eslint rule to enforce imports order
 
 ## [1.0.1] - 2025-01-17
 
