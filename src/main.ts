@@ -5,7 +5,6 @@ import * as core from "@actions/core";
 
 import { getConfig } from "./Config";
 import { Checker } from "./lib/index";
-
 import { getReport } from "./Report";
 
 const FAILED_MESSAGE = "Some files do not have valid SPDX headers";

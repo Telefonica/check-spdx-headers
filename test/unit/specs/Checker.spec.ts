@@ -1,13 +1,13 @@
 // SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Checker } from "../../../src/lib/index";
-import { stat, readFile, FileHandle } from "fs/promises";
-import { glob } from "glob";
 import { PathLike } from "fs";
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import satisfies from "../../../src/lib/spdx-satisfies/index";
+import { stat, readFile, FileHandle } from "fs/promises";
+
+import { glob } from "glob";
+import satisfies from "spdx-satisfies";
+
+import { Checker } from "../../../src/lib/index";
 
 jest.mock<typeof import("glob")>("glob", () => ({
   ...jest.requireActual("glob"),
@@ -40,13 +40,12 @@ describe("checker", () => {
     } as unknown as ReturnType<typeof stat>);
 
     // NOTE: Mock satisfies library. Return true only when they are equal
-    jest
-      .mocked(satisfies)
-      .mockImplementation(
-        (licenseFound: string, allowedLicenses: string[]): boolean => {
-          return allowedLicenses.includes(licenseFound);
-        },
-      );
+    jest.mocked(satisfies).mockImplementation(
+      //@ts-expect-error The library types are not correct. It should accept an array of licenses
+      (licenseFound: string, allowedLicenses: string[]): boolean => {
+        return allowedLicenses.includes(licenseFound);
+      },
+    );
   });
 
   describe("check method result", () => {
