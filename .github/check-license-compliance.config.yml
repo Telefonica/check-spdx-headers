@@ -7,7 +7,7 @@ licenses:
     - MIT
     - BSD
     - ISC
-    - (MIT AND CC-BY-3.0)
+    - CC-BY-3.0 AND MIT
   warning:
     - LGPL-3.0
     - LGPL-2.0
@@ -19,3 +19,5 @@ licenses:
     - CC BY-SA 4.0
     - CC-BY-3.0
     - CC0-1.0
+    - BSD-3-Clause
+    - BSD-2-Clause
