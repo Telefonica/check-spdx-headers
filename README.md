@@ -333,7 +333,7 @@ rules:
           - "**/*.js"
           - "**/*.yml"
         copyright:
-          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital and contributors"
+          - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital"
           - "\\d{4}(\\s-\\s\\d{4})? Telefónica Innovación Digital"
           - "\\d{4}(\\s-\\s\\d{4})? Telefónica"
 ```

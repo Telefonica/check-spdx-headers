@@ -56225,7 +56225,7 @@ function fromError(err, options = {}) {
 
 //# sourceMappingURL=index.mjs.map
 ;// CONCATENATED MODULE: ./src/lib/Logger.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 const logLevelSchema = z.enum([
@@ -56238,7 +56238,7 @@ const logLevelSchema = z.enum([
 ]);
 
 ;// CONCATENATED MODULE: ./src/lib/Config.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -56267,7 +56267,7 @@ const configSchema = z
     .strict();
 
 ;// CONCATENATED MODULE: ./src/Config.types.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -56287,7 +56287,7 @@ const allConfigSchema = z.object({
 });
 
 ;// CONCATENATED MODULE: ./src/Config.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -64783,7 +64783,7 @@ const chalkStderr = createChalk({level: stderrColor ? stderrColor.level : 0});
 var winston = __nccwpck_require__(4240);
 var winston_default = /*#__PURE__*/__nccwpck_require__.n(winston);
 ;// CONCATENATED MODULE: ./src/lib/Logger.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -64820,7 +64820,7 @@ function createLogger(level) {
 }
 
 ;// CONCATENATED MODULE: ./src/lib/Checker.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -65170,7 +65170,7 @@ class Checker {
 }
 
 ;// CONCATENATED MODULE: ./src/lib/index.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -65234,7 +65234,7 @@ function stripIndent(string) {
 }
 
 ;// CONCATENATED MODULE: ./src/Report.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -65384,7 +65384,7 @@ function getReport(reporter, result) {
 }
 
 ;// CONCATENATED MODULE: ./src/main.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 
@@ -65427,7 +65427,7 @@ async function run() {
 }
 
 ;// CONCATENATED MODULE: ./src/index.ts
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
 run();
