@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 # SPDX-License-Identifier: MIT
 
 name: Check SPDX Headers
@@ -42,7 +42,7 @@ runs:
   steps:
     - name: Check SPDX headers
       id: check-spdx-headers
-      uses: Telefonica/check-spdx-headers@v1.0.2
+      uses: Telefonica/check-spdx-headers@v1.0.3
       with:
         rules: ${{ inputs.rules }}
         ignore: ${{ inputs.ignore }}
