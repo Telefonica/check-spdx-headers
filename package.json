@@ -1,7 +1,7 @@
 {
   "name": "@tid-xcut/check-spdx-headers",
   "description": "Checks that files have the correct SPDX headers",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "author": "Telefónica Innovación Digital",
   "homepage": "https://github.com/Telefonica/check-spdx-headers",
   "repository": {
@@ -46,7 +46,7 @@
     "chalk": "5.3.0",
     "glob": "11.0.0",
     "indent-string": "5.0.0",
-    "spdx-satisfies": "5.0.1",
+    "spdx-satisfies": "6.0.0",
     "strip-indent": "4.0.0",
     "winston": "3.17.0",
     "yaml": "2.6.1",
@@ -60,6 +60,7 @@
     "@github/local-action": "2.2.0",
     "@types/jest": "29.5.14",
     "@types/node": "22.9.0",
+    "@types/spdx-satisfies": "0.1.2",
     "@typescript-eslint/eslint-plugin": "8.14.0",
     "@typescript-eslint/parser": "8.14.0",
     "@vercel/ncc": "0.38.3",

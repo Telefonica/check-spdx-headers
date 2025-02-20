@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+# SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 # SPDX-License-Identifier: MIT
 
 name: Continuous Integration
@@ -89,13 +89,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: ./.github/actions/setup-node
-        id: setup-node
-        with:
-          npm-token: ${{ secrets.NPM_TOKEN_XCUT }}
-
       - name: Check License Compliance
-        uses: Telefonica/check-license-compliance/.github/actions/check-and-comment@v0
+        uses: Telefonica/check-license-compliance/.github/actions/check-and-comment@v3.0.0-beta.2
+        with:
+          config-file: .github/check-license-compliance.config.yml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check-spdx-headers:

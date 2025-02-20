@@ -1,13 +1,15 @@
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
+
+import { existsSync } from "fs";
+import { readFile } from "fs/promises";
 
 import * as core from "@actions/core";
 import { parse } from "yaml";
-import { readFile } from "fs/promises";
-import { existsSync } from "fs";
+import { fromError } from "zod-validation-error";
+
 import { allConfigSchema } from "./Config.types";
 import type { InputOptions, AllConfig } from "./Config.types";
-import { fromError } from "zod-validation-error";
 
 /**
  * Returns the value if it is defined, otherwise returns undefined.

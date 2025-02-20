@@ -1,13 +1,14 @@
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
-import * as core from "@actions/core";
-import * as main from "../../../src/main";
-
-import { Checker } from "../../../src/lib/index";
-import { getConfig } from "../../../src/Config";
-import { readFile } from "fs/promises";
 import { existsSync } from "fs";
+import { readFile } from "fs/promises";
+
+import * as core from "@actions/core";
+
+import { getConfig } from "../../../src/Config";
+import { Checker } from "../../../src/lib/index";
+import * as main from "../../../src/main";
 
 jest.mock<typeof import("../../../src/lib/index")>(
   "../../../src/lib/index",
@@ -71,7 +72,6 @@ describe("action", () => {
 
     it("should throw when failOnNotValid has not a boolean value", async () => {
       getInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "fail-on-not-valid") {
           return "foo";
         }
@@ -89,7 +89,6 @@ describe("action", () => {
 
     it("should set reporter from inputs", async () => {
       getInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "reporter") {
           return "json";
         }
@@ -111,11 +110,10 @@ describe("action", () => {
     it("should get rules and ignore from inputs when there is no file", async () => {
       jest.mocked(existsSync).mockReturnValueOnce(false);
       getMultilineInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "rules") {
           return [`- name: "Rule 1"`, "  headers: []"];
         }
-        // eslint-disable-next-line jest/no-conditional-in-test
+
         if (name === "ignore") {
           return ["- file1", "- file2"];
         }
@@ -136,7 +134,6 @@ describe("action", () => {
 
     it("should get config from config input", async () => {
       getMultilineInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "config") {
           return ["rules: []", "log: debug", "ignore:", "  - file1"];
         }
@@ -152,7 +149,6 @@ describe("action", () => {
 
     it("should merge config from file and inputs", async () => {
       getMultilineInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "config") {
           return ["log: debug", "ignore:", "  - file1"];
         }
@@ -165,7 +161,6 @@ reporter: json
       `);
 
       getInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "log") {
           return "warning";
         }
@@ -290,7 +285,6 @@ reporter: json
 
     it("should set the action as failed if failOnNotValid is true", async () => {
       getInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "fail-on-not-valid") {
           return "true";
         }
@@ -320,7 +314,6 @@ reporter: json
 
     it("should not set the action as failed if failOnNotValid option is false", async () => {
       getInputMock.mockImplementation((name: string) => {
-        // eslint-disable-next-line jest/no-conditional-in-test
         if (name === "fail-on-not-valid") {
           return "false";
         }
@@ -400,7 +393,6 @@ reporter: json
       describe("when the reporter is json", () => {
         it("should include the whole result, adding a summary", async () => {
           getInputMock.mockImplementation((name: string) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (name === "reporter") {
               return "json";
             }
@@ -425,7 +417,6 @@ reporter: json
       describe("when the reporter is markdown", () => {
         it("should include the whole result, adding a summary", async () => {
           getInputMock.mockImplementation((name: string) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (name === "reporter") {
               return "markdown";
             }
@@ -563,7 +554,6 @@ reporter: json
       describe("when the reporter is json", () => {
         it("should include the whole result, adding a summary", async () => {
           getInputMock.mockImplementation((name: string) => {
-            // eslint-disable-next-line jest/no-conditional-in-test
             if (name === "reporter") {
               return "json";
             }

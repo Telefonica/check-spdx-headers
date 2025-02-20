@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Deprecated
 #### Removed
 
+## [1.0.3] - 2025-02-13
+
+### Changed
+
+* chore: Bump `check-license-compliance` action to v3.0.0-beta.2
+
+### Fixed
+
+* chore: Change copyright headers. Remove "and contributors" from files where no external developers contributed.
+
+## [1.0.2] - 2025-02-13
+
+### Changed
+
+* chore: Bump `check-license-compliance` action to v3.0.0-beta.1
+* chore: Bump `spdx-satisfies` to v6.0.0. Remove forked version of `spdx-satisfies` and use the official one
+* chore: Change license compliance config according to the open source scaffold
+* style: Fix imports order. Add eslint rule to enforce imports order
+
 ## [1.0.1] - 2025-01-17
 
 ### Fixed

@@ -1,9 +1,12 @@
-// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital and contributors
+// SPDX-FileCopyrightText: 2024 Telefónica Innovación Digital
 // SPDX-License-Identifier: Apache-2.0
 
+import { readFile, stat } from "fs/promises";
+
 import { glob } from "glob";
+import satisfies from "spdx-satisfies";
 import winston from "winston";
-import { Config, RuleHeaders, Rule, Ignore } from "./Config.types";
+
 import {
   Result,
   RuleResult,
@@ -11,12 +14,8 @@ import {
   FileRulesResults,
   FileError,
 } from "./Checker.types";
+import { Config, RuleHeaders, Rule, Ignore } from "./Config.types";
 import { createLogger } from "./Logger";
-import { readFile, stat } from "fs/promises";
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import satisfies from "./spdx-satisfies/index";
 
 /**
  * Check files for license headers
@@ -97,6 +96,7 @@ export class Checker {
       }
 
       try {
+        //@ts-expect-error Types library is not updated. From 6.0 version it supports passing an array of licenses
         if (!satisfies(spdxLicense, approvedLicenses)) {
           const message = `License ${spdxLicense} does not satisfy ${approvedLicenses.join(", ")}`;
           this.logger.debug(`${message} in file "${file}"`);
