@@ -111,9 +111,8 @@ When you're finished with the changes, create a pull request, also known as a PR
 
 This project uses [Semantic Versioning](https://semver.org/). The version number is defined in the `package.json` file. The version number must be updated in the `package.json` file before creating a new release.
 
-> [!WARNING]
-> The `check-and-comment` composite action version must be always updated before creating a new release. This is because the action itself can't be referenced locally when it is used in a external workflow. So, the reference to the action (`Telefonica/check-spdx-headers@x`) must always point to the latest released version. For example:
-> If the version in the package.json file is `1.0.0`, the reference to the action in the composite action must be `Telefonica/check-spdx-headers@v1.0.0` before tagging the release. __Note that this would lead to an error when running the PR check, because the action is not published yet. But this is the expected behavior, so, the action should be changed to the PR branch when opening a PR, and changed to the released version before tagging the release.__
+> [!IMPORTANT]
+> Before opening a PR, a new tag must be created in the repository with a beta version. This is because the composite action is used in the PR check, and the action must be referenced in the PR. The action can't be referenced locally, so it must be referenced by a tag. The tag must be created in the format `vX.Y.Z-beta.N`, where `X.Y.Z` is the version in the package.json file, and `N` is the beta version. For example, if the version in the package.json file is `1.0.0`, the tag must be `v1.0.0-beta.1`. This beta version must be defined in the `check-and-comment` composite action in the PR branch and in the package.json file. The beta version must be removed before tagging the release, as described below.
 
 ## Release process
 
