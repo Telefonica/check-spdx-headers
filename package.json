@@ -1,7 +1,7 @@
 {
   "name": "@tid-xcut/check-spdx-headers",
   "description": "Checks that files have the correct SPDX headers",
-  "version": "1.0.4",
+  "version": "1.0.4-beta.1",
   "author": "Telefónica Innovación Digital",
   "homepage": "https://github.com/Telefonica/check-spdx-headers",
   "repository": {
