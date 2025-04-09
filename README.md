@@ -1,4 +1,4 @@
-[![Build status](https://github.com/Telefonica/check-license-compliance/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Telefonica/check-license-compliance/actions?query=workflow%3Abuild+branch%3Amain) [![Last commit](https://img.shields.io/github/last-commit/Telefonica/check-license-compliance.svg)](https://github.com/Telefonica/check-license-compliance/commits) [![Last release](https://img.shields.io/github/release-date/Telefonica/check-license-compliance.svg)](https://github.com/Telefonica/check-license-compliance/releases)
+[![Build status](https://github.com/Telefonica/check-spdx-headers/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Telefonica/check-spdx-headers/actions?query=workflow%3Abuild+branch%3Amain) [![Last commit](https://img.shields.io/github/last-commit/Telefonica/check-spdx-headers.svg)](https://github.com/Telefonica/check-spdx-headers/commits) [![Last release](https://img.shields.io/github/release-date/Telefonica/check-spdx-headers.svg)](https://github.com/Telefonica/check-spdx-headers/releases)
 
 # Check SPDX headers
 
