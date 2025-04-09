@@ -1,3 +1,5 @@
+[![Build status](https://github.com/Telefonica/check-license-compliance/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/Telefonica/check-license-compliance/actions?query=workflow%3Abuild+branch%3Amain) [![Last commit](https://img.shields.io/github/last-commit/Telefonica/check-license-compliance.svg)](https://github.com/Telefonica/check-license-compliance/commits) [![Last release](https://img.shields.io/github/release-date/Telefonica/check-license-compliance.svg)](https://github.com/Telefonica/check-license-compliance/releases)
+
 # Check SPDX headers
 
 Checks that files have the correct SPDX headers according to a given configuration.
