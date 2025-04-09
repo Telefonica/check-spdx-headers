@@ -42,7 +42,7 @@ runs:
   steps:
     - name: Check SPDX headers
       id: check-spdx-headers
-      uses: Telefonica/check-spdx-headers@v1.0.4
+      uses: Telefonica/check-spdx-headers@v1.0.5
       with:
         rules: ${{ inputs.rules }}
         ignore: ${{ inputs.ignore }}

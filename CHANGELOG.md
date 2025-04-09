@@ -11,6 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Deprecated
 #### Removed
 
+## [1.0.5] - 2025-04-09
+
+### Changed
+
+* docs: Add badges to README
+* chore: Make some adjustments for a public repository
+
 ## [1.0.4] - 2025-03-28
 
 ### Changed
@@ -18,7 +25,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * chore: Bump `check-license-compliance` action to v3
 * chore: Bump `markdown-confluence-sync-action` action to v2
 * docs: Improve release process documentation
-
 
 ## [1.0.3] - 2025-02-13
 
